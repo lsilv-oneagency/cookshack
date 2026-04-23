@@ -75,7 +75,7 @@ function Hero() {
             </Link>
             <Link
               href="/category/ctgy_commercial_products"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-[#3D3D3D] text-white font-heading font-bold tracking-widest uppercase text-sm hover:border-[#E85D05] hover:text-[#E85D05] transition-all rounded"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded border-2 border-white/45 bg-black/35 text-white text-shadow-sm backdrop-blur-sm font-heading font-bold tracking-widest uppercase text-sm hover:border-[#E85D05] hover:bg-[#E85D05]/10 hover:text-[#E85D05] transition-all"
             >
               Shop Commercial
             </Link>
