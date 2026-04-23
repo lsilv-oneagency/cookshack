@@ -30,6 +30,7 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 const MEGA_PRODUCT_COUNT = 8;
+const MEGA_FETCH_MS = 20_000;
 
 interface HeaderProps {
   categories?: MivaCategory[];
@@ -46,7 +47,9 @@ export default function Header({ categories: _categories = [] }: HeaderProps) {
   const [megaLabel, setMegaLabel] = useState<string | null>(null);
   const [megaLoading, setMegaLoading] = useState(false);
   const [megaProducts, setMegaProducts] = useState<MivaProduct[]>([]);
+  const [megaError, setMegaError] = useState<string | null>(null);
   const megaCacheRef = useRef<Record<string, MivaProduct[]>>({});
+  const megaFetchGenRef = useRef(0);
   const [scrolled, setScrolled] = useState(false);
   const megaCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -60,6 +63,8 @@ export default function Header({ categories: _categories = [] }: HeaderProps) {
     setMobileOpen(false);
     setMegaLabel(null);
     setMegaProducts([]);
+    setMegaLoading(false);
+    setMegaError(null);
   }, [pathname]);
 
   const activeMegaItem = megaLabel ? NAV_ITEMS.find((i) => i.label === megaLabel) : undefined;
@@ -69,37 +74,59 @@ export default function Header({ categories: _categories = [] }: HeaderProps) {
     if (!activeMegaCode) {
       setMegaProducts([]);
       setMegaLoading(false);
+      setMegaError(null);
       return;
     }
     const cached = megaCacheRef.current[activeMegaCode];
     if (cached) {
       setMegaProducts(cached);
       setMegaLoading(false);
+      setMegaError(null);
       return;
     }
-    let cancelled = false;
+
+    const gen = ++megaFetchGenRef.current;
     setMegaLoading(true);
+    setMegaError(null);
     setMegaProducts([]);
+
     (async () => {
       try {
         const r = await fetch(
-          `/api/products?category=${encodeURIComponent(activeMegaCode)}&count=${MEGA_PRODUCT_COUNT}&sort=disp_order`
+          `/api/products?category=${encodeURIComponent(activeMegaCode)}&count=${MEGA_PRODUCT_COUNT}&sort=disp_order`,
+          { signal: AbortSignal.timeout(MEGA_FETCH_MS) }
         );
-        const j = await r.json();
-        const list: MivaProduct[] = j.data || [];
-        if (!cancelled) {
-          megaCacheRef.current[activeMegaCode] = list;
-          setMegaProducts(list);
+        const j = (await r.json()) as { data?: MivaProduct[]; error?: string };
+
+        if (gen !== megaFetchGenRef.current) return;
+
+        if (!r.ok) {
+          const msg = j.error || `Could not load products (${r.status})`;
+          setMegaError(msg);
+          setMegaProducts([]);
+          return;
         }
-      } catch {
-        if (!cancelled) setMegaProducts([]);
+
+        const list: MivaProduct[] = Array.isArray(j.data) ? j.data : [];
+        megaCacheRef.current[activeMegaCode] = list;
+        setMegaProducts(list);
+        setMegaError(null);
+      } catch (e) {
+        if (gen !== megaFetchGenRef.current) return;
+        const msg =
+          e instanceof Error
+            ? e.name === "TimeoutError"
+              ? "Request timed out — try again or open the category page."
+              : e.message
+            : "Could not load products.";
+        setMegaError(msg);
+        setMegaProducts([]);
       } finally {
-        if (!cancelled) setMegaLoading(false);
+        if (gen === megaFetchGenRef.current) {
+          setMegaLoading(false);
+        }
       }
     })();
-    return () => {
-      cancelled = true;
-    };
   }, [activeMegaCode]);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -324,6 +351,22 @@ export default function Header({ categories: _categories = [] }: HeaderProps) {
                         <div className="mx-auto mt-1 h-2 max-w-[55%] rounded bg-white/10" />
                       </div>
                     ))}
+                  </div>
+                ) : megaError ? (
+                  <div className="rounded-lg border border-white/15 bg-black/30 px-4 py-4 text-center backdrop-blur-md">
+                    <p className="text-xs text-[#E8E8E8] sm:text-sm">{megaError}</p>
+                    <p className="mt-2 text-[10px] text-[#9A9A9A] sm:text-xs">
+                      On the live site this is usually a Vercel env issue — copy every{" "}
+                      <code className="rounded bg-white/10 px-1">MIVA_*</code> value from{" "}
+                      <code className="rounded bg-white/10 px-1">.env.local</code> into Vercel (Production
+                      and Preview).
+                    </p>
+                    <Link
+                      href={activeMegaItem.href}
+                      className="mt-3 inline-block text-[10px] font-heading font-bold uppercase tracking-widest text-[#E85D05] hover:text-[#F48C06] sm:text-xs"
+                    >
+                      View category anyway →
+                    </Link>
                   </div>
                 ) : megaProducts.length === 0 ? (
                   <p className="py-4 text-center text-xs text-[#9A9A9A] sm:text-sm">
