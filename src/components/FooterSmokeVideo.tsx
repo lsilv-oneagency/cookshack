@@ -3,7 +3,6 @@
 import { useEffect, useRef } from "react";
 
 const SMOKE_MP4 = "/images/smoke-header.mp4";
-const SMOKE_MOV = "/images/smoke.mov";
 
 /** Looping smoke behind footer content; respects prefers-reduced-motion. */
 export default function FooterSmokeVideo() {
@@ -43,7 +42,6 @@ export default function FooterSmokeVideo() {
         src={SMOKE_MP4}
       >
         <source src={SMOKE_MP4} type="video/mp4" />
-        <source src={SMOKE_MOV} type="video/quicktime" />
       </video>
     </div>
   );

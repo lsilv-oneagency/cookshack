@@ -2,10 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
-/** Lightweight loop for nav (small MP4). */
+/** Lightweight smoke loop for nav (small MP4 only). */
 const SMOKE_MP4 = "/images/smoke-header.mp4";
-/** Full-quality loop, H.264 in MOV (~5MB); fallback after MP4. */
-const SMOKE_MOV = "/images/smoke.mov";
 
 /** Subtle looping smoke behind the glass nav; respects prefers-reduced-motion. */
 export default function HeaderSmokeVideo() {
@@ -44,7 +42,6 @@ export default function HeaderSmokeVideo() {
         className="absolute inset-0 h-full w-full object-cover object-center opacity-55 contrast-110 brightness-110"
       >
         <source src={SMOKE_MP4} type="video/mp4" />
-        <source src={SMOKE_MOV} type="video/quicktime" />
       </video>
     </div>
   );
