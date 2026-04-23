@@ -198,18 +198,11 @@ function FeaturedProductFallback() {
 async function FeaturedProduct() {
   let product: MivaProduct | null = null;
   try {
-    const featured = await getCategoryProducts("cat_featured_products", {
-      count: 1,
-      sort: "disp_order",
-    });
-    product = featured.data?.[0] ?? null;
-    if (!product) {
-      const pizza = await getCategoryProducts("sub_ctgy_pizza_oven", {
-        count: 1,
-        sort: "disp_order",
-      });
-      product = pizza.data?.[0] ?? null;
-    }
+    const [featured, pizza] = await Promise.all([
+      getCategoryProducts("cat_featured_products", { count: 1, sort: "disp_order" }),
+      getCategoryProducts("sub_ctgy_pizza_oven", { count: 1, sort: "disp_order" }),
+    ]);
+    product = featured.data?.[0] ?? pizza.data?.[0] ?? null;
   } catch {
     product = null;
   }
@@ -419,13 +412,15 @@ function WhyCookshack() {
 async function TopProducts() {
   let products: Awaited<ReturnType<typeof getProducts>>["data"] = [];
   try {
-    // Use the Featured Products category — real hero products with images.
-    // Fall back to residential equipment if featured is empty.
-    const res = await getCategoryProducts("cat_featured_products", { count: 8, sort: "disp_order" });
-    products = res.data || [];
+    const [featured, residential] = await Promise.all([
+      getCategoryProducts("cat_featured_products", { count: 8, sort: "disp_order" }),
+      getCategoryProducts("ctgy_residential_equipment", { count: 8, sort: "disp_order" }),
+    ]);
+    products =
+      featured.data && featured.data.length > 0 ? featured.data : residential.data || [];
     if (products.length === 0) {
-      const fallback = await getCategoryProducts("ctgy_residential_equipment", { count: 8, sort: "disp_order" });
-      products = fallback.data || [];
+      const res = await getProducts({ count: 8, sort: "disp_order" });
+      products = res.data || [];
     }
   } catch {
     try {

@@ -19,10 +19,10 @@ const HTTP_USER = process.env.MIVA_HTTP_USER || "";
 // Password stored directly to avoid dotenv $ interpolation issues
 const HTTP_PASS = process.env.MIVA_HTTP_PASS || "NQbHbylsp1?1k$r0";
 
-/** Max time for each Miva HTTP call — avoids hung prerender on hosts without env or slow API */
+/** Keep under Next.js ~60s static generation budget when several calls run (layout + page). */
 const MIVA_FETCH_TIMEOUT_MS = Math.min(
-  25_000,
-  Number(process.env.MIVA_FETCH_TIMEOUT_MS) || 25_000
+  12_000,
+  Number(process.env.MIVA_FETCH_TIMEOUT_MS) || 12_000
 );
 
 function generateAuthHeader(body: string): string {
