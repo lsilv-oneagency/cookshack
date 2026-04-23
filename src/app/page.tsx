@@ -183,7 +183,6 @@ function FeaturedProductFallback() {
               className="object-cover rounded-xl"
               unoptimized
             />
-            <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#1A1A1A]/40 rounded-xl pointer-events-none" />
           </div>
         </div>
       </div>
@@ -278,7 +277,6 @@ async function FeaturedProduct() {
               sizes="(max-width: 768px) 100vw, 50vw"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#1A1A1A]/35 pointer-events-none rounded-xl" />
           </div>
         </div>
       </div>
