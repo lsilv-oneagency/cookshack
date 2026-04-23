@@ -178,26 +178,71 @@ const getProductCatalog = unstable_cache(
   async (): Promise<MivaProduct[]> => {
     const res = await mivaListRequest<MivaProduct>({
       Function: "ProductList_Load_Query",
-      Count: 999,
+      Count: 5000,
       Filter: [{ name: "active", operator: "EQ", value: true }],
-      ondemandcolumns: ["uris", "productimagedata"],
+      ondemandcolumns: ["uris", "productimagedata", "catcount", "CustomField_Values"],
     });
     return res.data || [];
   },
-  ["miva-product-catalog"],
+  ["miva-product-catalog-v2"],
   { revalidate: 300 } // 5-minute cache
 );
 
+/**
+ * Resolve a product by `code` for PDP and APIs.
+ * Uses cached catalog when possible, then a direct list query by code (covers SKUs outside the first N catalog rows).
+ * Never throws — use `error_message` when Miva failed vs missing product (no `error_message`).
+ */
 export async function getProductByCode(
   code: string
 ): Promise<MivaApiResponse<MivaProduct>> {
-  const catalog = await getProductCatalog();
-  const product = catalog.find(
-    (p) => p.code.toLowerCase() === code.toLowerCase()
-  ) ?? null;
+  const normalized = decodeURIComponent(code).trim();
+  const codeLc = normalized.toLowerCase();
+
+  let lastError: string | null = null;
+  let catalog: MivaProduct[] = [];
+
+  try {
+    catalog = await getProductCatalog();
+  } catch (e) {
+    lastError = e instanceof Error ? e.message : "Catalog load failed";
+  }
+
+  let product = catalog.find((p) => p.code.toLowerCase() === codeLc) ?? null;
+
+  if (!product) {
+    try {
+      const res = await mivaListRequest<MivaProduct>({
+        Function: "ProductList_Load_Query",
+        Count: 1,
+        Offset: 0,
+        Sort: "code",
+        Filter: [
+          { name: "active", operator: "EQ", value: true },
+          { name: "code", operator: "EQ", value: normalized },
+        ],
+        ondemandcolumns: ["uris", "productimagedata", "catcount", "CustomField_Values"],
+      });
+      product = res.data?.[0] ?? null;
+      lastError = null;
+    } catch (e) {
+      lastError = e instanceof Error ? e.message : "Product load failed";
+    }
+  } else {
+    lastError = null;
+  }
+
+  if (product) {
+    return {
+      success: 1 as unknown as boolean,
+      data: product as MivaProduct,
+    };
+  }
+
   return {
-    success: product ? (1 as unknown as boolean) : (0 as unknown as boolean),
-    data: product as MivaProduct,
+    success: 0 as unknown as boolean,
+    data: undefined as unknown as MivaProduct,
+    ...(lastError ? { error_message: lastError } : {}),
   };
 }
 

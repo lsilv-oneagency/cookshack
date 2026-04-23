@@ -7,14 +7,12 @@ export async function GET(
 ) {
   const { code } = await params;
 
-  try {
-    const result = await getProductByCode(decodeURIComponent(code));
+  const result = await getProductByCode(decodeURIComponent(code));
+  if (result.data) {
     return NextResponse.json(result);
-  } catch (error) {
-    console.error("[API] product detail error:", error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Product not found" },
-      { status: 404 }
-    );
   }
+  if (result.error_message) {
+    return NextResponse.json(result, { status: 502 });
+  }
+  return NextResponse.json(result, { status: 404 });
 }
