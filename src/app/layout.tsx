@@ -15,6 +15,9 @@ const outfit = Outfit({
   display: "swap",
 });
 
+/** Avoid Vercel static prerender >60s when Miva is slow — render on demand instead. */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: {
     default: "Cookshack — Smokers, Grills & Pizza Ovens",

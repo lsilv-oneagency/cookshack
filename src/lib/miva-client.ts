@@ -19,6 +19,12 @@ const HTTP_USER = process.env.MIVA_HTTP_USER || "";
 // Password stored directly to avoid dotenv $ interpolation issues
 const HTTP_PASS = process.env.MIVA_HTTP_PASS || "NQbHbylsp1?1k$r0";
 
+/** Cap each Miva round-trip so `next build` / static generation stays under platform limits. */
+const MIVA_FETCH_TIMEOUT_MS = Math.min(
+  12_000,
+  Number(process.env.MIVA_FETCH_TIMEOUT_MS) || 12_000
+);
+
 function generateAuthHeader(body: string): string {
   if (!SIGNING_KEY) {
     return `MIVA ${API_TOKEN}`;
@@ -31,6 +37,10 @@ function generateAuthHeader(body: string): string {
 }
 
 async function mivaRequest<T>(payload: Record<string, unknown>): Promise<T> {
+  if (!STORE_URL || !API_TOKEN || !STORE_CODE) {
+    throw new Error("Miva API not configured (MIVA_STORE_URL, MIVA_API_TOKEN, MIVA_STORE_CODE)");
+  }
+
   const body = JSON.stringify({
     Store_Code: STORE_CODE,
     Miva_Request_Timestamp: Math.floor(Date.now() / 1000),
@@ -49,11 +59,13 @@ async function mivaRequest<T>(payload: Record<string, unknown>): Promise<T> {
       "Basic " + Buffer.from(`${HTTP_USER}:${HTTP_PASS}`).toString("base64");
   }
 
-  const response = await fetch(`${STORE_URL}/mm5/json.mvc`, {
+  const baseUrl = STORE_URL.replace(/\/$/, "");
+  const response = await fetch(`${baseUrl}/mm5/json.mvc`, {
     method: "POST",
     headers,
     body,
     next: { revalidate: 60 },
+    signal: AbortSignal.timeout(MIVA_FETCH_TIMEOUT_MS),
   });
 
   if (!response.ok) {
