@@ -30,11 +30,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function ProductPage({ params }: PageProps) {
   const { code } = await params;
 
-  const res = await getProductByCode(decodeURIComponent(code));
-  const product = res.data;
-  const mivaError = res.error_message;
+  let product: Awaited<ReturnType<typeof getProductByCode>>["data"];
+  let loadError: string | null = null;
 
-  if (mivaError && !product) {
+  try {
+    const res = await getProductByCode(decodeURIComponent(code));
+    product = res.data;
+  } catch (e) {
+    loadError = e instanceof Error ? e.message : "Failed to load product";
+  }
+
+  if (loadError) {
     return (
       <>
         <CatalogHeroBand paddingClassName="py-3">
@@ -53,7 +59,7 @@ export default async function ProductPage({ params }: PageProps) {
         <div className="bg-white min-h-[50vh]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
             <p className="font-heading font-bold text-[#1A1A1A] uppercase tracking-wide mb-3">Unable to load product</p>
-            <p className="text-[#6B6B6B] mb-6 max-w-md mx-auto">{mivaError}</p>
+            <p className="text-[#6B6B6B] mb-6 max-w-md mx-auto">{loadError}</p>
             <p className="text-sm text-[#9A9A9A] mb-8 max-w-md mx-auto">
               Copy your <code className="text-xs bg-[#F5F5F5] px-1 rounded">MIVA_*</code> values from{" "}
               <code className="text-xs bg-[#F5F5F5] px-1 rounded">.env.local</code> into Vercel (Production and Preview), then redeploy.

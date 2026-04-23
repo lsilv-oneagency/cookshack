@@ -12,124 +12,63 @@ import type {
 
 const STORE_URL = process.env.MIVA_STORE_URL || "";
 const API_TOKEN = process.env.MIVA_API_TOKEN || "";
-const SIGNING_KEY = (process.env.MIVA_SIGNING_KEY || "").trim();
+const SIGNING_KEY = process.env.MIVA_SIGNING_KEY || "";
 const STORE_CODE = process.env.MIVA_STORE_CODE || "";
 const DIGEST = process.env.MIVA_SIGNING_DIGEST || "sha256";
 const HTTP_USER = process.env.MIVA_HTTP_USER || "";
-// Prefer MIVA_HTTP_PASS; fallback avoids dotenv `$` interpolation issues for some setups.
+// Password stored directly to avoid dotenv $ interpolation issues
 const HTTP_PASS = process.env.MIVA_HTTP_PASS || "NQbHbylsp1?1k$r0";
 
-/** Keep fetches bounded so static generation stays within platform limits. */
-const MIVA_FETCH_TIMEOUT_MS = Math.min(
-  12_000,
-  Number(process.env.MIVA_FETCH_TIMEOUT_MS) || 12_000
-);
-
-function tokenAuthHeader(): string {
-  return `MIVA ${API_TOKEN}`;
-}
-
-/** HMAC header, or null if token-only / invalid key material. */
-function tryHmacAuthHeader(body: string): string | null {
-  if (!SIGNING_KEY) return null;
-  try {
-    const keyBuffer = Buffer.from(SIGNING_KEY, "base64");
-    if (keyBuffer.length === 0) return null;
-    const signature = createHmac(DIGEST, keyBuffer).update(body).digest("base64");
-    const digestLabel = DIGEST === "sha1" ? "SHA1" : "SHA256";
-    return `MIVA-HMAC-${digestLabel} ${API_TOKEN}:${signature}`;
-  } catch {
-    return null;
+function generateAuthHeader(body: string): string {
+  if (!SIGNING_KEY) {
+    return `MIVA ${API_TOKEN}`;
   }
-}
 
-function isMivaAuthFailure(message: string, httpStatus: number): boolean {
-  if (httpStatus === 401 || httpStatus === 403) return true;
-  const m = message.toLowerCase();
-  return (
-    m.includes("access denied") ||
-    m.includes("unauthorized") ||
-    m.includes("authentication failed") ||
-    m.includes("invalid signature") ||
-    m.includes("invalid hmac") ||
-    m.includes("signature mismatch")
-  );
+  const keyBuffer = Buffer.from(SIGNING_KEY, "base64");
+  const signature = createHmac(DIGEST, keyBuffer).update(body).digest("base64");
+  const digestLabel = DIGEST === "sha1" ? "SHA1" : "SHA256";
+  return `MIVA-HMAC-${digestLabel} ${API_TOKEN}:${signature}`;
 }
 
 async function mivaRequest<T>(payload: Record<string, unknown>): Promise<T> {
-  if (!STORE_URL || !API_TOKEN || !STORE_CODE) {
-    throw new Error("Miva API not configured (MIVA_STORE_URL, MIVA_API_TOKEN, MIVA_STORE_CODE)");
-  }
-
   const body = JSON.stringify({
     Store_Code: STORE_CODE,
     Miva_Request_Timestamp: Math.floor(Date.now() / 1000),
     ...payload,
   });
 
-  const hmacHeader = tryHmacAuthHeader(body);
-  const baseUrl = STORE_URL.replace(/\/$/, "");
-  const url = `${baseUrl}/mm5/json.mvc`;
+  const authHeader = generateAuthHeader(body);
 
-  const run = async (xMivaAuthorization: string): Promise<T> => {
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      "X-Miva-API-Authorization": xMivaAuthorization,
-    };
-
-    if (HTTP_USER && HTTP_PASS) {
-      headers["Authorization"] =
-        "Basic " + Buffer.from(`${HTTP_USER}:${HTTP_PASS}`).toString("base64");
-    }
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers,
-      body,
-      next: { revalidate: 60 },
-      signal: AbortSignal.timeout(MIVA_FETCH_TIMEOUT_MS),
-    });
-
-    if (!response.ok) {
-      const errText = `Miva API HTTP error: ${response.status}`;
-      if (isMivaAuthFailure(errText, response.status)) {
-        const e = new Error(errText);
-        (e as Error & { mivaAuthRetry?: boolean }).mivaAuthRetry = true;
-        throw e;
-      }
-      throw new Error(errText);
-    }
-
-    const json = await response.json();
-
-    if (!json.success && json.success !== true && json.success !== 1) {
-      const msg = json.error_message || `Miva API error: ${json.error_code}`;
-      if (isMivaAuthFailure(msg, response.status)) {
-        const e = new Error(msg);
-        (e as Error & { mivaAuthRetry?: boolean }).mivaAuthRetry = true;
-        throw e;
-      }
-      throw new Error(msg);
-    }
-
-    return json;
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    "X-Miva-API-Authorization": authHeader,
   };
 
-  if (hmacHeader) {
-    try {
-      return await run(hmacHeader);
-    } catch (first) {
-      const retry =
-        first instanceof Error &&
-        (first as Error & { mivaAuthRetry?: boolean }).mivaAuthRetry === true;
-      if (retry) {
-        return await run(tokenAuthHeader());
-      }
-      throw first;
-    }
+  if (HTTP_USER && HTTP_PASS) {
+    headers["Authorization"] =
+      "Basic " + Buffer.from(`${HTTP_USER}:${HTTP_PASS}`).toString("base64");
   }
 
-  return await run(tokenAuthHeader());
+  const response = await fetch(`${STORE_URL}/mm5/json.mvc`, {
+    method: "POST",
+    headers,
+    body,
+    next: { revalidate: 60 },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Miva API HTTP error: ${response.status}`);
+  }
+
+  const json = await response.json();
+
+  if (!json.success && json.success !== true && json.success !== 1) {
+    throw new Error(
+      json.error_message || `Miva API error: ${json.error_code}`
+    );
+  }
+
+  return json;
 }
 
 // Miva list responses nest the array: { success, data: { total_count, start_offset, data: [] } }
@@ -178,71 +117,26 @@ const getProductCatalog = unstable_cache(
   async (): Promise<MivaProduct[]> => {
     const res = await mivaListRequest<MivaProduct>({
       Function: "ProductList_Load_Query",
-      Count: 5000,
+      Count: 999,
       Filter: [{ name: "active", operator: "EQ", value: true }],
-      ondemandcolumns: ["uris", "productimagedata", "catcount", "CustomField_Values"],
+      ondemandcolumns: ["uris", "productimagedata"],
     });
     return res.data || [];
   },
-  ["miva-product-catalog-v2"],
+  ["miva-product-catalog"],
   { revalidate: 300 } // 5-minute cache
 );
 
-/**
- * Resolve a product by `code` for PDP and APIs.
- * Uses cached catalog when possible, then a direct list query by code (covers SKUs outside the first N catalog rows).
- * Never throws — use `error_message` when Miva failed vs missing product (no `error_message`).
- */
 export async function getProductByCode(
   code: string
 ): Promise<MivaApiResponse<MivaProduct>> {
-  const normalized = decodeURIComponent(code).trim();
-  const codeLc = normalized.toLowerCase();
-
-  let lastError: string | null = null;
-  let catalog: MivaProduct[] = [];
-
-  try {
-    catalog = await getProductCatalog();
-  } catch (e) {
-    lastError = e instanceof Error ? e.message : "Catalog load failed";
-  }
-
-  let product = catalog.find((p) => p.code.toLowerCase() === codeLc) ?? null;
-
-  if (!product) {
-    try {
-      const res = await mivaListRequest<MivaProduct>({
-        Function: "ProductList_Load_Query",
-        Count: 1,
-        Offset: 0,
-        Sort: "code",
-        Filter: [
-          { name: "active", operator: "EQ", value: true },
-          { name: "code", operator: "EQ", value: normalized },
-        ],
-        ondemandcolumns: ["uris", "productimagedata", "catcount", "CustomField_Values"],
-      });
-      product = res.data?.[0] ?? null;
-      lastError = null;
-    } catch (e) {
-      lastError = e instanceof Error ? e.message : "Product load failed";
-    }
-  } else {
-    lastError = null;
-  }
-
-  if (product) {
-    return {
-      success: 1 as unknown as boolean,
-      data: product as MivaProduct,
-    };
-  }
-
+  const catalog = await getProductCatalog();
+  const product = catalog.find(
+    (p) => p.code.toLowerCase() === code.toLowerCase()
+  ) ?? null;
   return {
-    success: 0 as unknown as boolean,
-    data: undefined as unknown as MivaProduct,
-    ...(lastError ? { error_message: lastError } : {}),
+    success: product ? (1 as unknown as boolean) : (0 as unknown as boolean),
+    data: product as MivaProduct,
   };
 }
 
