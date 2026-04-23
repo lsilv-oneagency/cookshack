@@ -40,59 +40,21 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   let products: Awaited<ReturnType<typeof getCategoryProducts>>["data"] = [];
   let totalCount = 0;
   let error = "";
-  let categoryLoadError = "";
 
   try {
-    const catRes = await getCategoryByCode(decodedCode);
+    const [catRes, prodRes] = await Promise.all([
+      getCategoryByCode(decodedCode),
+      getCategoryProducts(decodedCode, { count: PAGE_SIZE, offset, sort }),
+    ]);
     category = catRes.data;
-  } catch (e) {
-    categoryLoadError = e instanceof Error ? e.message : "Failed to load category";
-  }
-
-  if (categoryLoadError) {
-    return (
-      <>
-        <CatalogHeroBand paddingClassName="py-10 sm:py-14">
-          <nav className="flex items-center gap-2 text-xs text-[#6B6B6B] mb-4">
-            <Link href="/" className="hover:text-[#E85D05] transition">
-              Home
-            </Link>
-            <span>/</span>
-            <span className="text-[#9A9A9A]">Category</span>
-          </nav>
-          <h1 className="font-heading font-extrabold text-white text-2xl sm:text-3xl tracking-wider uppercase">
-            Unable to load category
-          </h1>
-        </CatalogHeroBand>
-        <div className="bg-white min-h-[40vh]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-            <p className="text-[#6B6B6B] mb-6 max-w-md mx-auto">{categoryLoadError}</p>
-            <p className="text-sm text-[#9A9A9A] mb-8">
-              This often means the storefront cannot reach the Miva API on the server (check Vercel env vars and signing credentials).
-            </p>
-            <Link
-              href="/shop"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#E85D05] text-white font-heading font-bold tracking-widest uppercase text-sm rounded hover:bg-[#C44A00] transition"
-            >
-              Back to shop
-            </Link>
-          </div>
-        </div>
-      </>
-    );
-  }
-
-  if (!category) {
-    notFound();
-  }
-
-  try {
-    const prodRes = await getCategoryProducts(decodedCode, { count: PAGE_SIZE, offset, sort });
     products = prodRes.data || [];
     totalCount = prodRes.total_count || 0;
   } catch (e) {
+    if (!category) notFound();
     error = e instanceof Error ? e.message : "Failed to load products";
   }
+
+  if (!category) notFound();
 
   return (
     <>

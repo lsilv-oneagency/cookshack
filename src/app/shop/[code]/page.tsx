@@ -31,44 +31,11 @@ export default async function ProductPage({ params }: PageProps) {
   const { code } = await params;
 
   let product: Awaited<ReturnType<typeof getProductByCode>>["data"];
-  let loadError = "";
   try {
     const res = await getProductByCode(decodeURIComponent(code));
     product = res.data;
-  } catch (e) {
-    loadError = e instanceof Error ? e.message : "Failed to load product";
-  }
-
-  if (loadError) {
-    return (
-      <>
-        <CatalogHeroBand paddingClassName="py-3">
-          <nav className="flex items-center gap-2 text-xs text-[#6B6B6B]">
-            <Link href="/" className="hover:text-[#E85D05] transition">
-              Home
-            </Link>
-            <span>/</span>
-            <Link href="/shop" className="hover:text-[#E85D05] transition">
-              Shop
-            </Link>
-            <span>/</span>
-            <span className="text-[#9A9A9A]">Product</span>
-          </nav>
-        </CatalogHeroBand>
-        <div className="bg-white min-h-[50vh]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-            <p className="font-heading font-bold text-[#1A1A1A] uppercase tracking-wide mb-3">Unable to load product</p>
-            <p className="text-[#6B6B6B] mb-8 max-w-md mx-auto">{loadError}</p>
-            <Link
-              href="/shop"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#E85D05] text-white font-heading font-bold tracking-widest uppercase text-sm rounded hover:bg-[#C44A00] transition"
-            >
-              Back to shop
-            </Link>
-          </div>
-        </div>
-      </>
-    );
+  } catch {
+    notFound();
   }
 
   if (!product) notFound();
