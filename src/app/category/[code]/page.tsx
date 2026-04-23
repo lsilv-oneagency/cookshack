@@ -61,9 +61,9 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
       {/* Category header */}
       <CatalogHeroBand paddingClassName="py-10 sm:py-14">
         <nav className="flex items-center gap-2 text-xs text-[#6B6B6B] mb-4">
-          <Link href="/" className="hover:text-[#E85D05] transition">Home</Link>
+          <Link href="/" className="hover:text-[#AE1B07] transition">Home</Link>
           <span>/</span>
-          <Link href="/shop" className="hover:text-[#E85D05] transition">Shop</Link>
+          <Link href="/shop" className="hover:text-[#AE1B07] transition">Shop</Link>
           <span>/</span>
           <span className="text-[#9A9A9A]">{category.name}</span>
         </nav>

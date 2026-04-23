@@ -22,7 +22,7 @@ export default function SortSelect({ value }: Props) {
         url.searchParams.delete("offset");
         window.location.href = url.toString();
       }}
-      className="text-sm border border-[#D4C8BE] rounded px-3 py-1.5 bg-white text-[#1A1A1A] focus:outline-none focus:ring-2 focus:ring-[#E85D05]"
+      className="text-sm border border-[#D4C8BE] rounded px-3 py-1.5 bg-white text-[#1A1A1A] focus:outline-none focus:ring-2 focus:ring-[#AE1B07]"
     >
       {SORT_OPTIONS.map((o) => (
         <option key={o.value} value={o.value}>{o.label}</option>

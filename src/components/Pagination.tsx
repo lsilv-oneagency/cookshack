@@ -37,7 +37,7 @@ export default function Pagination({ total, count, offset }: PaginationProps) {
       <button
         onClick={() => navigate(currentPage - 1)}
         disabled={currentPage === 1}
-        className="p-2 rounded text-[#6B6B6B] hover:text-[#E85D05] hover:bg-white border border-transparent hover:border-[#E8E0D8] disabled:opacity-30 disabled:cursor-not-allowed transition"
+        className="p-2 rounded text-[#6B6B6B] hover:text-[#AE1B07] hover:bg-white border border-transparent hover:border-[#E8E0D8] disabled:opacity-30 disabled:cursor-not-allowed transition"
         aria-label="Previous"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -51,7 +51,7 @@ export default function Pagination({ total, count, offset }: PaginationProps) {
           onClick={() => navigate(page)}
           className={`w-9 h-9 rounded text-sm font-heading font-bold tracking-wide transition ${
             page === currentPage
-              ? "bg-[#E85D05] text-white"
+              ? "bg-[#AE1B07] text-white"
               : "text-[#6B6B6B] hover:text-[#1A1A1A] hover:bg-white border border-transparent hover:border-[#E8E0D8]"
           }`}
         >
@@ -62,7 +62,7 @@ export default function Pagination({ total, count, offset }: PaginationProps) {
       <button
         onClick={() => navigate(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="p-2 rounded text-[#6B6B6B] hover:text-[#E85D05] hover:bg-white border border-transparent hover:border-[#E8E0D8] disabled:opacity-30 disabled:cursor-not-allowed transition"
+        className="p-2 rounded text-[#6B6B6B] hover:text-[#AE1B07] hover:bg-white border border-transparent hover:border-[#E8E0D8] disabled:opacity-30 disabled:cursor-not-allowed transition"
         aria-label="Next"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

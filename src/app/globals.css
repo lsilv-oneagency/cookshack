@@ -18,10 +18,10 @@
 
 @theme {
   /* ── Cookshack Brand Colors ── */
-  --color-cs-orange:      #E85D05;
-  --color-cs-orange-light:#F48C06;
-  --color-cs-orange-dark: #C44A00;
-  --color-cs-red:         #AE2012;
+  --color-cs-orange:      #AE1B07;
+  --color-cs-orange-light:#AE1B07;
+  --color-cs-orange-dark: #8E1405;
+  --color-cs-red:         #AE1B07;
   --color-cs-charcoal:    #1A1A1A;
   --color-cs-dark:        #111111;
   --color-cs-smoke:       #2B2B2B;

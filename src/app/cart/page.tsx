@@ -15,7 +15,7 @@ export default function CartPage() {
     <>
       <CatalogHeroBand paddingClassName="py-10">
         <nav className="flex items-center gap-2 text-xs text-[#6B6B6B] mb-4">
-          <Link href="/" className="hover:text-[#E85D05] transition">Home</Link>
+          <Link href="/" className="hover:text-[#AE1B07] transition">Home</Link>
           <span>/</span>
           <span className="text-[#9A9A9A]">Cart</span>
         </nav>
@@ -38,7 +38,7 @@ export default function CartPage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           {items.length === 0 ? (
             <div className="text-center py-24">
-              <IconShoppingCart className="w-20 h-20 mx-auto mb-6 text-[#E85D05]" aria-hidden />
+              <IconShoppingCart className="w-20 h-20 mx-auto mb-6 text-[#AE1B07]" aria-hidden />
               <h2 className="font-heading font-extrabold text-[#1A1A1A] text-2xl tracking-wider uppercase mb-2">
                 Your Cart is Empty
               </h2>
@@ -47,7 +47,7 @@ export default function CartPage() {
               </p>
               <Link
                 href="/shop"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-[#E85D05] text-white font-heading font-bold tracking-widest uppercase text-sm hover:bg-[#C44A00] transition rounded"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-[#AE1B07] text-white font-heading font-bold tracking-widest uppercase text-sm hover:bg-[#8E1405] transition rounded"
               >
                 Browse Products
               </Link>
@@ -61,7 +61,7 @@ export default function CartPage() {
                   const imgUrl = rawImg ? mivaImgUrl(rawImg) : "";
 
                   return (
-                    <div key={item.product_code} className="flex gap-5 p-5 bg-white border border-[#E8E0D8] rounded shadow-sm hover:border-[#E85D05]/30 transition">
+                    <div key={item.product_code} className="flex gap-5 p-5 bg-white border border-[#E8E0D8] rounded shadow-sm hover:border-[#AE1B07]/30 transition">
                       <div className="relative w-24 h-24 flex-shrink-0 bg-white border border-[#E8E0D8] rounded overflow-hidden">
                         {imgUrl ? (
                           <Image
@@ -82,14 +82,14 @@ export default function CartPage() {
                       <div className="flex-1 min-w-0">
                         <Link
                           href={`/shop/${item.product_code}`}
-                          className="text-sm font-heading font-bold text-[#1A1A1A] uppercase tracking-wide hover:text-[#E85D05] transition line-clamp-2 leading-snug"
+                          className="text-sm font-heading font-bold text-[#1A1A1A] uppercase tracking-wide hover:text-[#AE1B07] transition line-clamp-2 leading-snug"
                         >
                           {item.product_name}
                         </Link>
                         {item.product_sku && (
                           <p className="text-[10px] text-[#9A9A9A] font-mono mt-0.5">{item.product_sku}</p>
                         )}
-                        <p className="text-sm font-bold text-[#E85D05] mt-1">{item.product_formatted_price}</p>
+                        <p className="text-sm font-bold text-[#AE1B07] mt-1">{item.product_formatted_price}</p>
 
                         <div className="flex items-center justify-between mt-3">
                           <div className="flex items-center border border-[#D4C8BE] rounded overflow-hidden bg-white">
@@ -159,14 +159,14 @@ export default function CartPage() {
 
                   <a
                     href={`${storeUrl}/checkout`}
-                    className="block w-full py-4 text-center bg-[#E85D05] text-white font-heading font-bold tracking-widest uppercase text-sm hover:bg-[#C44A00] active:scale-[0.98] transition-all rounded"
+                    className="block w-full py-4 text-center bg-[#AE1B07] text-white font-heading font-bold tracking-widest uppercase text-sm hover:bg-[#8E1405] active:scale-[0.98] transition-all rounded"
                   >
                     Proceed to Checkout
                   </a>
 
                   <Link
                     href="/shop"
-                    className="block w-full py-3 text-center text-xs font-heading font-bold tracking-widest uppercase text-[#6B6B6B] hover:text-[#E85D05] transition mt-2"
+                    className="block w-full py-3 text-center text-xs font-heading font-bold tracking-widest uppercase text-[#6B6B6B] hover:text-[#AE1B07] transition mt-2"
                   >
                     Continue Shopping
                   </Link>
@@ -177,7 +177,7 @@ export default function CartPage() {
                       Secure Checkout
                     </span>
                     <span>·</span>
-                    <a href="tel:18004230698" className="inline-flex items-center gap-1.5 hover:text-[#E85D05] transition">
+                    <a href="tel:18004230698" className="inline-flex items-center gap-1.5 hover:text-[#AE1B07] transition">
                       <IconPhone className="w-4 h-4 text-[#6B6B6B]" aria-hidden />
                       1-800-423-0698
                     </a>
