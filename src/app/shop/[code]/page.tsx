@@ -1,0 +1,233 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
+import { getProductByCode, getProducts } from "@/lib/miva-client";
+import AddToCartButton from "./AddToCartButton";
+import ProductImage from "@/components/ProductImage";
+import { IconArrowUturnLeft, IconCheckCircle, IconPhone, IconTruck } from "@/components/icons";
+
+interface PageProps {
+  params: Promise<{ code: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { code } = await params;
+  try {
+    const res = await getProductByCode(decodeURIComponent(code));
+    const p = res.data;
+    return {
+      title: p?.name || "Product",
+      description: `${p?.name} — ${p?.descrip?.replace(/<[^>]*>/g, "").slice(0, 140) || "Shop Cookshack products."}`,
+    };
+  } catch {
+    return { title: "Product" };
+  }
+}
+
+export default async function ProductPage({ params }: PageProps) {
+  const { code } = await params;
+
+  let product: Awaited<ReturnType<typeof getProductByCode>>["data"];
+  try {
+    const res = await getProductByCode(decodeURIComponent(code));
+    product = res.data;
+  } catch {
+    notFound();
+  }
+
+  if (!product) notFound();
+
+  const proxyImg = (path: string) =>
+    path
+      ? `/api/img?p=${encodeURIComponent(path.startsWith("http") ? path : path.replace(/^\//, ""))}`
+      : "";
+
+  const images = [product.image, ...(product.productimagedata?.map((i) => i.image) || [])]
+    .filter(Boolean)
+    .filter((v, i, a) => a.indexOf(v) === i)
+    .map(proxyImg);
+
+  const mainImage = images[0];
+  const inStock = product.inv1 === undefined || product.inv1 > 0;
+
+  let related: Awaited<ReturnType<typeof getProducts>>["data"] = [];
+  try {
+    const res = await getProducts({ count: 5 });
+    related = (res.data || []).filter((p) => p.code !== product!.code).slice(0, 4);
+  } catch {}
+
+  return (
+    <>
+      {/* Breadcrumb bar */}
+      <div className="bg-[#1A1A1A] border-b border-[#2B2B2B]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <nav className="flex items-center gap-2 text-xs text-[#6B6B6B]">
+            <Link href="/" className="hover:text-[#E85D04] transition">Home</Link>
+            <span>/</span>
+            <Link href="/shop" className="hover:text-[#E85D04] transition">Shop</Link>
+            <span>/</span>
+            <span className="text-[#9A9A9A] truncate max-w-xs">{product.name}</span>
+          </nav>
+        </div>
+      </div>
+
+      <div className="bg-[#F5F0EB] min-h-screen">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <div className="grid lg:grid-cols-2 gap-10 xl:gap-16">
+
+            {/* ── Images ── */}
+            <div className="space-y-3">
+              <div className="relative aspect-square bg-white border border-[#E8E0D8] rounded overflow-hidden">
+                <ProductImage
+                  src={mainImage}
+                  alt={product.name}
+                  productCode={product.code}
+                  productName={product.name}
+                  fill
+                  className="object-contain p-6"
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+              </div>
+              {images.length > 1 && (
+                <div className="grid grid-cols-4 gap-2">
+                  {images.slice(0, 4).map((img, i) => (
+                    <div
+                      key={i}
+                      className="relative aspect-square bg-white border border-[#E8E0D8] rounded overflow-hidden hover:border-[#E85D04] transition cursor-pointer"
+                    >
+                      <Image
+                        src={img}
+                        alt={`${product.name} view ${i + 1}`}
+                        fill
+                        className="object-contain p-2"
+                        sizes="120px"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* ── Details ── */}
+            <div className="flex flex-col gap-5">
+              {product.sku && (
+                <p className="text-xs text-[#9A9A9A] font-mono tracking-wider">SKU: {product.sku}</p>
+              )}
+
+              <h1 className="font-heading font-extrabold text-[#1A1A1A] text-2xl sm:text-3xl lg:text-4xl tracking-wider uppercase leading-tight">
+                {product.name}
+              </h1>
+
+              {/* Price + stock */}
+              <div className="flex items-center gap-4 flex-wrap">
+                <span className="font-heading font-extrabold text-4xl text-[#1A1A1A]">
+                  {product.formatted_price || `$${product.price?.toFixed(2)}`}
+                </span>
+                <span
+                  className={`inline-flex items-center gap-1.5 text-xs font-heading font-bold tracking-wider uppercase px-3 py-1 rounded ${
+                    inStock
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  {inStock && <IconCheckCircle className="w-4 h-4 shrink-0" aria-hidden />}
+                  {inStock ? "In Stock" : "Out of Stock"}
+                </span>
+              </div>
+
+              {product.weight > 0 && (
+                <p className="text-sm text-[#6B6B6B]">
+                  Weight:{" "}
+                  <span className="font-semibold text-[#3D3D3D]">{product.weight} lbs</span>
+                </p>
+              )}
+
+              {/* Add to cart */}
+              <div className="border-t border-b border-[#E8E0D8] py-5">
+                <AddToCartButton product={product} inStock={inStock} />
+              </div>
+
+              {/* Trust signals */}
+              <div className="grid grid-cols-3 gap-3">
+                {(
+                  [
+                    { Icon: IconTruck, label: "Free Shipping", sub: "On qualifying orders" },
+                    { Icon: IconArrowUturnLeft, label: "Easy Returns", sub: "30-day guarantee" },
+                    { Icon: IconPhone, label: "Expert Support", sub: "1-800-423-0698" },
+                  ] as const
+                ).map(({ Icon, label, sub }) => (
+                  <div key={label} className="bg-white border border-[#E8E0D8] rounded p-3 text-center">
+                    <div className="flex justify-center mb-1 text-[#E85D04]">
+                      <Icon className="w-6 h-6" aria-hidden />
+                    </div>
+                    <p className="text-[10px] font-heading font-bold text-[#1A1A1A] uppercase tracking-wider">{label}</p>
+                    <p className="text-[9px] text-[#9A9A9A] mt-0.5">{sub}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Description */}
+              {product.descrip && (
+                <div className="border-t border-[#E8E0D8] pt-5">
+                  <h2 className="font-heading font-bold text-[#1A1A1A] text-lg tracking-wider uppercase mb-3">
+                    Description
+                  </h2>
+                  <div
+                    className="prose prose-sm max-w-none text-[#3D3D3D] leading-relaxed prose-headings:font-heading prose-headings:uppercase prose-headings:tracking-wide prose-a:text-[#E85D04] prose-a:no-underline hover:prose-a:underline"
+                    dangerouslySetInnerHTML={{ __html: product.descrip }}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ── Related Products ── */}
+          {related.length > 0 && (
+            <section className="mt-20">
+              <div className="flex items-end justify-between mb-8">
+                <div>
+                  <h2 className="font-heading font-extrabold text-3xl sm:text-4xl text-[#1A1A1A] tracking-wider uppercase">
+                    You Might Also Like
+                  </h2>
+                  <div className="w-12 h-1 bg-[#E85D04] mt-2" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+                {related.map((p) => {
+                  const img = p.image ? proxyImg(p.image) : null;
+                  return (
+                    <Link
+                      key={p.code}
+                      href={`/shop/${p.code}`}
+                      className="group flex flex-col bg-white border border-[#E8E0D8] hover:border-[#E85D04] rounded overflow-hidden transition shadow-sm hover:shadow-md"
+                    >
+                      <div className="relative aspect-square bg-[#F5F0EB]">
+                        {img ? (
+                          <Image src={img} alt={p.name} fill className="object-contain p-3 group-hover:scale-105 transition-transform duration-500" sizes="25vw" />
+                        ) : (
+                          <div className="absolute inset-0 bg-[#F0EBE3] flex items-center justify-center">
+                            <svg className="w-12 h-12 text-[#C4B9AE]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-4">
+                        <h3 className="text-sm font-heading font-bold tracking-wide uppercase text-[#1A1A1A] line-clamp-2 group-hover:text-[#E85D04] transition leading-snug">{p.name}</h3>
+                        <p className="font-heading font-extrabold text-lg text-[#1A1A1A] mt-2">
+                          {p.formatted_price || `$${p.price?.toFixed(2)}`}
+                        </p>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}

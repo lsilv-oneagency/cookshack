@@ -1,26 +1,70 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+  Mesquite Std — place your licensed font files in public/fonts/:
+    MesquiteStd.otf  (or .woff2 / .woff)
+  then uncomment the @font-face block below.
+*/
+@font-face {
+  font-family: "Mesquite Std";
+  src: url("/fonts/MesquiteStd.otf") format("opentype"),
+       url("/fonts/MesquiteStd.woff2") format("woff2"),
+       url("/fonts/MesquiteStd.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@theme {
+  /* ── Cookshack Brand Colors ── */
+  --color-cs-orange:      #E85D04;
+  --color-cs-orange-light:#F48C06;
+  --color-cs-orange-dark: #C44A00;
+  --color-cs-red:         #AE2012;
+  --color-cs-charcoal:    #1A1A1A;
+  --color-cs-dark:        #111111;
+  --color-cs-smoke:       #2B2B2B;
+  --color-cs-ash:         #3D3D3D;
+  --color-cs-gray:        #6B6B6B;
+  --color-cs-muted:       #9A9A9A;
+  --color-cs-light:       #F5F0EB;
+  --color-cs-cream:       #FFF8F0;
+  --color-cs-border:      #2E2E2E;
+
+  /* ── Typography ── */
+  --font-mesquite: "Mesquite Std", "Rye", "Rockwell Extra Bold", "Rockwell", serif;
+  --font-heading:  "Barlow Condensed", "Arial Narrow", ui-sans-serif, system-ui, sans-serif;
+  --font-body:     "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: #F5F0EB;
+    color: #1A1A1A;
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .text-shadow-sm {
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  }
+  .text-shadow {
+    text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+  }
+  .text-shadow-lg {
+    text-shadow: 0 4px 20px rgba(0,0,0,0.8);
+  }
 }
