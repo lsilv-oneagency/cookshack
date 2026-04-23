@@ -13,8 +13,8 @@ A ground-up rebuild of cookshack.com using the **Miva JSON API** as the data lay
 | Dark surface | `#1A1A1A` |
 | Smoke | `#2B2B2B` |
 | Cream (page bg) | `#F5F0EB` |
-| Heading font | Barlow Condensed (uppercase) |
-| Body font | Inter |
+| Primary font | [Outfit](https://fonts.google.com/specimen/Outfit) (100–900, `next/font/google`, optical sizing on) |
+| Logo / display | Mesquite Std when bundled in `public/fonts/`; otherwise falls back to Outfit |
 
 ## Pages
 

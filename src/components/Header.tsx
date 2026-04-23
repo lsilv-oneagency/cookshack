@@ -53,14 +53,14 @@ const NAV_ITEMS: { label: string; href: string; sub: NavSubItem[] }[] = [
   },
 ];
 
-// ── Cookshack Logo — Mesquite Std (Rye fallback) ─────────────────────────────
+// ── Cookshack Logo — Mesquite Std when present in /public/fonts; else Outfit ──
 function CookshackLogo() {
   return (
     <span className="flex flex-col leading-none gap-0.5">
       <span
         style={{
-          fontFamily:
-            "'Mesquite Std', var(--font-mesquite), 'Rye', 'Rockwell Extra Bold', serif",
+          fontFamily: "var(--font-mesquite)",
+          fontOpticalSizing: "auto",
           fontSize: "1.75rem",
           letterSpacing: "0.05em",
           lineHeight: 1,

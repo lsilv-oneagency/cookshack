@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Barlow_Condensed, Inter, Rye } from "next/font/google";
+import { Outfit } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import CartDrawer from "@/components/CartDrawer";
@@ -8,19 +8,11 @@ import Footer from "@/components/Footer";
 import { getCategories } from "@/lib/miva-client";
 import type { MivaCategory } from "@/types/miva";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-body" });
-const barlowCondensed = Barlow_Condensed({
+// Outfit (variable, 100–900) — same family as fonts.googleapis.com/css2?family=Outfit
+const outfit = Outfit({
   subsets: ["latin"],
-  weight: ["400", "600", "700", "800"],
-  variable: "--font-heading",
-});
-// Rye — western slab serif, closest freely-available match for Mesquite Std.
-// Drop MesquiteStd.otf into public/fonts/ and the @font-face in globals.css
-// will automatically take precedence via the --font-mesquite CSS variable.
-const rye = Rye({
-  subsets: ["latin"],
-  weight: "400",
-  variable: "--font-mesquite",
+  variable: "--font-outfit",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -59,7 +51,7 @@ async function RootLayoutInner({ children }: { children: React.ReactNode }) {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${barlowCondensed.variable} ${rye.variable} antialiased`}>
+      <body className={`${outfit.variable} antialiased`}>
         <RootLayoutInner>{children}</RootLayoutInner>
       </body>
     </html>

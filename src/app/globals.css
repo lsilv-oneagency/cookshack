@@ -32,10 +32,10 @@
   --color-cs-cream:       #FFF8F0;
   --color-cs-border:      #2E2E2E;
 
-  /* ── Typography ── */
-  --font-mesquite: "Mesquite Std", "Rye", "Rockwell Extra Bold", "Rockwell", serif;
-  --font-heading:  "Barlow Condensed", "Arial Narrow", ui-sans-serif, system-ui, sans-serif;
-  --font-body:     "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* ── Typography (Outfit via next/font → --font-outfit on <body>) ── */
+  --font-mesquite: "Mesquite Std", var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
@@ -46,14 +46,22 @@
     background-color: #F5F0EB;
     color: #1A1A1A;
     font-family: var(--font-body);
+    font-optical-sizing: auto;
     -webkit-font-smoothing: antialiased;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
+    font-optical-sizing: auto;
     font-weight: 700;
     letter-spacing: 0.02em;
     text-transform: uppercase;
+  }
+
+  /* @tailwindcss/typography — match storefront sans (Outfit) */
+  :where(.prose) {
+    font-family: var(--font-body);
+    font-optical-sizing: auto;
   }
 }
 
