@@ -196,17 +196,30 @@ function FeaturedProductFallback() {
  */
 async function FeaturedProduct() {
   let product: MivaProduct | null = null;
+
   try {
     const [featured, pizza] = await Promise.all([
       getCategoryProducts("cat_featured_products", { count: 1, sort: "disp_order" }),
       getCategoryProducts("sub_ctgy_pizza_oven", { count: 1, sort: "disp_order" }),
     ]);
     product = featured.data?.[0] ?? pizza.data?.[0] ?? null;
-  } catch {
-    product = null;
+  } catch (e) {
+    console.error("[FeaturedProduct] category Miva request failed:", e);
   }
 
   if (!product) {
+    try {
+      const catalog = await getProducts({ count: 1, sort: "disp_order" });
+      product = catalog.data?.[0] ?? null;
+    } catch (e) {
+      console.error("[FeaturedProduct] catalog fallback Miva request failed:", e);
+    }
+  }
+
+  if (!product) {
+    console.warn(
+      "[FeaturedProduct] no product from Miva (check Vercel env, signing key, Preview env, or category codes); showing static fallback"
+    );
     return <FeaturedProductFallback />;
   }
 
