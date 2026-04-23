@@ -12,63 +12,124 @@ import type {
 
 const STORE_URL = process.env.MIVA_STORE_URL || "";
 const API_TOKEN = process.env.MIVA_API_TOKEN || "";
-const SIGNING_KEY = process.env.MIVA_SIGNING_KEY || "";
+const SIGNING_KEY = (process.env.MIVA_SIGNING_KEY || "").trim();
 const STORE_CODE = process.env.MIVA_STORE_CODE || "";
 const DIGEST = process.env.MIVA_SIGNING_DIGEST || "sha256";
 const HTTP_USER = process.env.MIVA_HTTP_USER || "";
-// Password stored directly to avoid dotenv $ interpolation issues
+// Prefer MIVA_HTTP_PASS; fallback avoids dotenv `$` interpolation issues for some setups.
 const HTTP_PASS = process.env.MIVA_HTTP_PASS || "NQbHbylsp1?1k$r0";
 
-function generateAuthHeader(body: string): string {
-  if (!SIGNING_KEY) {
-    return `MIVA ${API_TOKEN}`;
-  }
+/** Keep fetches bounded so static generation stays within platform limits. */
+const MIVA_FETCH_TIMEOUT_MS = Math.min(
+  12_000,
+  Number(process.env.MIVA_FETCH_TIMEOUT_MS) || 12_000
+);
 
-  const keyBuffer = Buffer.from(SIGNING_KEY, "base64");
-  const signature = createHmac(DIGEST, keyBuffer).update(body).digest("base64");
-  const digestLabel = DIGEST === "sha1" ? "SHA1" : "SHA256";
-  return `MIVA-HMAC-${digestLabel} ${API_TOKEN}:${signature}`;
+function tokenAuthHeader(): string {
+  return `MIVA ${API_TOKEN}`;
+}
+
+/** HMAC header, or null if token-only / invalid key material. */
+function tryHmacAuthHeader(body: string): string | null {
+  if (!SIGNING_KEY) return null;
+  try {
+    const keyBuffer = Buffer.from(SIGNING_KEY, "base64");
+    if (keyBuffer.length === 0) return null;
+    const signature = createHmac(DIGEST, keyBuffer).update(body).digest("base64");
+    const digestLabel = DIGEST === "sha1" ? "SHA1" : "SHA256";
+    return `MIVA-HMAC-${digestLabel} ${API_TOKEN}:${signature}`;
+  } catch {
+    return null;
+  }
+}
+
+function isMivaAuthFailure(message: string, httpStatus: number): boolean {
+  if (httpStatus === 401 || httpStatus === 403) return true;
+  const m = message.toLowerCase();
+  return (
+    m.includes("access denied") ||
+    m.includes("unauthorized") ||
+    m.includes("authentication failed") ||
+    m.includes("invalid signature") ||
+    m.includes("invalid hmac") ||
+    m.includes("signature mismatch")
+  );
 }
 
 async function mivaRequest<T>(payload: Record<string, unknown>): Promise<T> {
+  if (!STORE_URL || !API_TOKEN || !STORE_CODE) {
+    throw new Error("Miva API not configured (MIVA_STORE_URL, MIVA_API_TOKEN, MIVA_STORE_CODE)");
+  }
+
   const body = JSON.stringify({
     Store_Code: STORE_CODE,
     Miva_Request_Timestamp: Math.floor(Date.now() / 1000),
     ...payload,
   });
 
-  const authHeader = generateAuthHeader(body);
+  const hmacHeader = tryHmacAuthHeader(body);
+  const baseUrl = STORE_URL.replace(/\/$/, "");
+  const url = `${baseUrl}/mm5/json.mvc`;
 
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    "X-Miva-API-Authorization": authHeader,
+  const run = async (xMivaAuthorization: string): Promise<T> => {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      "X-Miva-API-Authorization": xMivaAuthorization,
+    };
+
+    if (HTTP_USER && HTTP_PASS) {
+      headers["Authorization"] =
+        "Basic " + Buffer.from(`${HTTP_USER}:${HTTP_PASS}`).toString("base64");
+    }
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers,
+      body,
+      next: { revalidate: 60 },
+      signal: AbortSignal.timeout(MIVA_FETCH_TIMEOUT_MS),
+    });
+
+    if (!response.ok) {
+      const errText = `Miva API HTTP error: ${response.status}`;
+      if (isMivaAuthFailure(errText, response.status)) {
+        const e = new Error(errText);
+        (e as Error & { mivaAuthRetry?: boolean }).mivaAuthRetry = true;
+        throw e;
+      }
+      throw new Error(errText);
+    }
+
+    const json = await response.json();
+
+    if (!json.success && json.success !== true && json.success !== 1) {
+      const msg = json.error_message || `Miva API error: ${json.error_code}`;
+      if (isMivaAuthFailure(msg, response.status)) {
+        const e = new Error(msg);
+        (e as Error & { mivaAuthRetry?: boolean }).mivaAuthRetry = true;
+        throw e;
+      }
+      throw new Error(msg);
+    }
+
+    return json;
   };
 
-  if (HTTP_USER && HTTP_PASS) {
-    headers["Authorization"] =
-      "Basic " + Buffer.from(`${HTTP_USER}:${HTTP_PASS}`).toString("base64");
+  if (hmacHeader) {
+    try {
+      return await run(hmacHeader);
+    } catch (first) {
+      const retry =
+        first instanceof Error &&
+        (first as Error & { mivaAuthRetry?: boolean }).mivaAuthRetry === true;
+      if (retry) {
+        return await run(tokenAuthHeader());
+      }
+      throw first;
+    }
   }
 
-  const response = await fetch(`${STORE_URL}/mm5/json.mvc`, {
-    method: "POST",
-    headers,
-    body,
-    next: { revalidate: 60 },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Miva API HTTP error: ${response.status}`);
-  }
-
-  const json = await response.json();
-
-  if (!json.success && json.success !== true && json.success !== 1) {
-    throw new Error(
-      json.error_message || `Miva API error: ${json.error_code}`
-    );
-  }
-
-  return json;
+  return await run(tokenAuthHeader());
 }
 
 // Miva list responses nest the array: { success, data: { total_count, start_offset, data: [] } }
