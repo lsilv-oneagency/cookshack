@@ -6,6 +6,8 @@ try {
   storeHostname = new URL(storeUrl).hostname;
 } catch {}
 
+const legacyBase = (process.env.NEXT_PUBLIC_STORE_URL || "").replace(/\/$/, "");
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -16,6 +18,22 @@ const nextConfig: NextConfig = {
       // Allow any https image during development/demo
       { protocol: "https" as const, hostname: "**" },
     ],
+  },
+  async redirects() {
+    if (!legacyBase) return [];
+    const paths = [
+      "/recipes",
+      "/support",
+      "/order-history",
+      "/sign-in",
+      "/privacy-policy",
+      "/terms-of-service",
+    ];
+    return paths.map((source) => ({
+      source,
+      destination: `${legacyBase}${source}`,
+      permanent: false,
+    }));
   },
 };
 
