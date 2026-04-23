@@ -5,6 +5,8 @@ import Link from "next/link";
 import { getProductByCode, getProducts } from "@/lib/miva-client";
 import AddToCartButton from "./AddToCartButton";
 import ProductImage from "@/components/ProductImage";
+import ProductCard from "@/components/ProductCard";
+import CatalogHeroBand from "@/components/CatalogHeroBand";
 import { IconArrowUturnLeft, IconCheckCircle, IconPhone, IconTruck } from "@/components/icons";
 
 interface PageProps {
@@ -60,19 +62,17 @@ export default async function ProductPage({ params }: PageProps) {
   return (
     <>
       {/* Breadcrumb bar */}
-      <div className="bg-[#1A1A1A] border-b border-[#2B2B2B]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <nav className="flex items-center gap-2 text-xs text-[#6B6B6B]">
-            <Link href="/" className="hover:text-[#E85D04] transition">Home</Link>
-            <span>/</span>
-            <Link href="/shop" className="hover:text-[#E85D04] transition">Shop</Link>
-            <span>/</span>
-            <span className="text-[#9A9A9A] truncate max-w-xs">{product.name}</span>
-          </nav>
-        </div>
-      </div>
+      <CatalogHeroBand paddingClassName="py-3">
+        <nav className="flex items-center gap-2 text-xs text-[#6B6B6B]">
+          <Link href="/" className="hover:text-[#E85D05] transition">Home</Link>
+          <span>/</span>
+          <Link href="/shop" className="hover:text-[#E85D05] transition">Shop</Link>
+          <span>/</span>
+          <span className="text-[#9A9A9A] truncate max-w-xs">{product.name}</span>
+        </nav>
+      </CatalogHeroBand>
 
-      <div className="bg-[#F5F0EB] min-h-screen">
+      <div className="bg-white min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="grid lg:grid-cols-2 gap-10 xl:gap-16">
 
@@ -95,7 +95,7 @@ export default async function ProductPage({ params }: PageProps) {
                   {images.slice(0, 4).map((img, i) => (
                     <div
                       key={i}
-                      className="relative aspect-square bg-white border border-[#E8E0D8] rounded overflow-hidden hover:border-[#E85D04] transition cursor-pointer"
+                      className="relative aspect-square bg-white border border-[#E8E0D8] rounded overflow-hidden hover:border-[#E85D05] transition cursor-pointer"
                     >
                       <Image
                         src={img}
@@ -159,7 +159,7 @@ export default async function ProductPage({ params }: PageProps) {
                   ] as const
                 ).map(({ Icon, label, sub }) => (
                   <div key={label} className="bg-white border border-[#E8E0D8] rounded p-3 text-center">
-                    <div className="flex justify-center mb-1 text-[#E85D04]">
+                    <div className="flex justify-center mb-1 text-[#E85D05]">
                       <Icon className="w-6 h-6" aria-hidden />
                     </div>
                     <p className="text-[10px] font-heading font-bold text-[#1A1A1A] uppercase tracking-wider">{label}</p>
@@ -175,7 +175,7 @@ export default async function ProductPage({ params }: PageProps) {
                     Description
                   </h2>
                   <div
-                    className="prose prose-sm max-w-none text-[#3D3D3D] leading-relaxed prose-headings:font-heading prose-headings:uppercase prose-headings:tracking-wide prose-a:text-[#E85D04] prose-a:no-underline hover:prose-a:underline"
+                    className="prose prose-sm max-w-none text-[#3D3D3D] leading-relaxed prose-headings:font-heading prose-headings:uppercase prose-headings:tracking-wide prose-a:text-[#E85D05] prose-a:no-underline hover:prose-a:underline"
                     dangerouslySetInnerHTML={{ __html: product.descrip }}
                   />
                 </div>
@@ -191,38 +191,13 @@ export default async function ProductPage({ params }: PageProps) {
                   <h2 className="font-heading font-extrabold text-3xl sm:text-4xl text-[#1A1A1A] tracking-wider uppercase">
                     You Might Also Like
                   </h2>
-                  <div className="w-12 h-1 bg-[#E85D04] mt-2" />
+                  <div className="w-12 h-1 bg-[#E85D05] mt-2" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
-                {related.map((p) => {
-                  const img = p.image ? proxyImg(p.image) : null;
-                  return (
-                    <Link
-                      key={p.code}
-                      href={`/shop/${p.code}`}
-                      className="group flex flex-col bg-white border border-[#E8E0D8] hover:border-[#E85D04] rounded overflow-hidden transition shadow-sm hover:shadow-md"
-                    >
-                      <div className="relative aspect-square bg-[#F5F0EB]">
-                        {img ? (
-                          <Image src={img} alt={p.name} fill className="object-contain p-3 group-hover:scale-105 transition-transform duration-500" sizes="25vw" />
-                        ) : (
-                          <div className="absolute inset-0 bg-[#F0EBE3] flex items-center justify-center">
-                            <svg className="w-12 h-12 text-[#C4B9AE]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <h3 className="text-sm font-heading font-bold tracking-wide uppercase text-[#1A1A1A] line-clamp-2 group-hover:text-[#E85D04] transition leading-snug">{p.name}</h3>
-                        <p className="font-heading font-extrabold text-lg text-[#1A1A1A] mt-2">
-                          {p.formatted_price || `$${p.price?.toFixed(2)}`}
-                        </p>
-                      </div>
-                    </Link>
-                  );
-                })}
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
+                {related.map((p) => (
+                  <ProductCard key={p.code} product={p} />
+                ))}
               </div>
             </section>
           )}

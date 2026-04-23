@@ -1,12 +1,14 @@
 import Link from "next/link";
+import { CookshackLogoLockup } from "@/components/CookshackLogo";
+import FooterSmokeVideo from "@/components/FooterSmokeVideo";
 
 export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-[#111111] text-[#9A9A9A]">
+    <footer className="text-[#9A9A9A]">
       {/* ── Top CTA band ── */}
-      <div className="bg-[#E85D04]">
+      <div className="bg-[#E85D05]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-white text-center sm:text-left">
             <p className="font-heading font-bold text-xl sm:text-2xl tracking-widest uppercase">
@@ -18,7 +20,7 @@ export default function Footer() {
           </div>
           <a
             href="tel:18004230698"
-            className="flex items-center gap-2 px-6 py-3 bg-white text-[#E85D04] font-heading font-bold text-lg tracking-wider uppercase rounded hover:bg-orange-50 transition whitespace-nowrap"
+            className="flex items-center gap-2 px-6 py-3 bg-white text-[#E85D05] font-heading font-bold text-lg tracking-wider uppercase rounded hover:bg-orange-50 transition whitespace-nowrap"
           >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
@@ -28,21 +30,26 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* ── Main footer grid ── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 lg:gap-10">
+      <div className="relative overflow-hidden bg-[#0a0a0a]">
+        <FooterSmokeVideo />
+        <div
+          className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-[#0a0a0a]/72 via-[#111111]/68 to-[#0a0a0a]/75"
+          aria-hidden
+        />
+        <div className="relative z-10">
+          {/* ── Main footer grid ── */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-8 lg:gap-10">
 
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <Link href="/" className="inline-block mb-5">
-              <div className="flex flex-col leading-none">
-                <span className="text-white font-heading text-2xl font-extrabold tracking-wider uppercase">
-                  COOKSHACK
-                </span>
-                <span className="text-[#E85D04] text-[8px] font-bold tracking-[0.2em] uppercase mt-0.5">
-                  Nothing Beats A Cookshack!
-                </span>
-              </div>
+            <Link href="/" className="group mb-5 inline-block" aria-label="Cookshack — Home">
+              <CookshackLogoLockup
+                align="start"
+                interactive
+                wordmarkClassName="h-9 max-w-[min(100%,18rem)] sm:h-10"
+                taglineClassName="mt-0.5 font-heading text-[8px] font-bold uppercase tracking-[0.2em] text-[#E85D05]"
+              />
             </Link>
             <p className="text-sm text-[#6B6B6B] leading-relaxed mb-5">
               Family-owned and operated since 1962. Engineering world-class BBQ equipment
@@ -61,7 +68,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={s.label}
-                  className="w-8 h-8 rounded-full bg-[#2B2B2B] flex items-center justify-center text-[#6B6B6B] hover:bg-[#E85D04] hover:text-white transition"
+                  className="w-8 h-8 rounded-full bg-[#2B2B2B] flex items-center justify-center text-[#6B6B6B] hover:bg-[#E85D05] hover:text-white transition"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d={s.icon} />
@@ -87,7 +94,7 @@ export default function Footer() {
                 ["Pizza Ovens", "/category/sub_ctgy_pizza_oven"],
               ].map(([label, href]) => (
                 <li key={href}>
-                  <Link href={href} className="hover:text-[#E85D04] transition">
+                  <Link href={href} className="hover:text-[#E85D05] transition">
                     {label}
                   </Link>
                 </li>
@@ -109,7 +116,7 @@ export default function Footer() {
                 ["FAQs", "/faq"],
               ].map(([label, href]) => (
                 <li key={href}>
-                  <Link href={href} className="hover:text-[#E85D04] transition">
+                  <Link href={href} className="hover:text-[#E85D05] transition">
                     {label}
                   </Link>
                 </li>
@@ -130,7 +137,7 @@ export default function Footer() {
                 ["Commercial Inquiries", "/commercial-inquiries"],
               ].map(([label, href]) => (
                 <li key={href}>
-                  <Link href={href} className="hover:text-[#E85D04] transition">
+                  <Link href={href} className="hover:text-[#E85D05] transition">
                     {label}
                   </Link>
                 </li>
@@ -144,7 +151,7 @@ export default function Footer() {
             <address className="not-italic text-sm space-y-3 text-[#6B6B6B]">
               <p>
                 <span className="block text-[#9A9A9A] mb-0.5 font-medium">Phone</span>
-                <a href="tel:18004230698" className="text-white hover:text-[#E85D04] transition font-semibold">
+                <a href="tel:18004230698" className="text-white hover:text-[#E85D05] transition font-semibold">
                   1-800-423-0698
                 </a>
               </p>
@@ -158,7 +165,7 @@ export default function Footer() {
                 Ponca City, OK 74601
               </p>
               <p>
-                <a href="mailto:info@cookshack.com" className="hover:text-[#E85D04] transition">
+                <a href="mailto:info@cookshack.com" className="hover:text-[#E85D05] transition">
                   info@cookshack.com
                 </a>
               </p>
@@ -176,6 +183,8 @@ export default function Footer() {
             <Link href="/terms-of-service" className="hover:text-white transition">Terms of Service</Link>
             <span className="hidden sm:inline">Powered by Miva Commerce</span>
           </div>
+        </div>
+      </div>
         </div>
       </div>
     </footer>

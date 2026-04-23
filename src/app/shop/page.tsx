@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getProducts } from "@/lib/miva-client";
 import ProductGrid from "@/components/ProductGrid";
 import Pagination from "@/components/Pagination";
+import CatalogHeroBand from "@/components/CatalogHeroBand";
 import SortSelect from "./SortSelect";
 
 export const metadata: Metadata = {
@@ -37,25 +38,23 @@ export default async function ShopPage({ searchParams }: PageProps) {
   return (
     <>
       {/* Page header */}
-      <div className="bg-[#1A1A1A] border-b border-[#2B2B2B]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <nav className="flex items-center gap-2 text-xs text-[#6B6B6B] mb-4">
-            <Link href="/" className="hover:text-[#E85D04] transition">Home</Link>
-            <span>/</span>
-            <span className="text-[#9A9A9A]">All Products</span>
-          </nav>
-          <h1 className="font-heading font-extrabold text-white text-4xl sm:text-5xl tracking-wider uppercase">
-            All Products
-          </h1>
-          {totalCount > 0 && (
-            <p className="text-[#6B6B6B] text-sm mt-2">
-              {totalCount.toLocaleString()} products in our catalog
-            </p>
-          )}
-        </div>
-      </div>
+      <CatalogHeroBand paddingClassName="py-10">
+        <nav className="flex items-center gap-2 text-xs text-[#6B6B6B] mb-4">
+          <Link href="/" className="hover:text-[#E85D05] transition">Home</Link>
+          <span>/</span>
+          <span className="text-[#9A9A9A]">All Products</span>
+        </nav>
+        <h1 className="font-heading font-extrabold text-white text-4xl sm:text-5xl tracking-wider uppercase">
+          All Products
+        </h1>
+        {totalCount > 0 && (
+          <p className="text-[#6B6B6B] text-sm mt-2">
+            {totalCount.toLocaleString()} products in our catalog
+          </p>
+        )}
+      </CatalogHeroBand>
 
-      <div className="bg-[#F5F0EB] min-h-screen">
+      <div className="bg-white min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           {/* Controls */}
           <div className="flex items-center justify-between mb-6 flex-wrap gap-4">

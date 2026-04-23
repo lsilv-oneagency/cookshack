@@ -1,13 +1,13 @@
+import CatalogHeroBand from "@/components/CatalogHeroBand";
+
 export default function ShopLoading() {
   return (
     <>
-      <div className="bg-[#1A1A1A] border-b border-[#2B2B2B]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="h-3 bg-[#2B2B2B] rounded w-32 mb-4 animate-pulse" />
-          <div className="h-10 bg-[#2B2B2B] rounded w-64 animate-pulse" />
-        </div>
-      </div>
-      <div className="bg-[#F5F0EB] min-h-screen">
+      <CatalogHeroBand paddingClassName="py-10">
+        <div className="h-3 bg-white/15 rounded w-32 mb-4 animate-pulse" />
+        <div className="h-10 bg-white/15 rounded w-64 animate-pulse" />
+      </CatalogHeroBand>
+      <div className="bg-white min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
             {Array.from({ length: 8 }).map((_, i) => (

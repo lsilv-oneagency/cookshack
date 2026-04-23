@@ -3,6 +3,7 @@ import Image from "next/image";
 import { getProducts, getCategoryProducts } from "@/lib/miva-client";
 import ProductCard from "@/components/ProductCard";
 import ProductImage from "@/components/ProductImage";
+import HeroBackground from "@/components/HeroBackground";
 import type { MivaProduct } from "@/types/miva";
 import {
   IconArrowUturnLeft,
@@ -21,36 +22,40 @@ const IMG = (p: string) => `/api/img?p=${encodeURIComponent(`mm5/graphics/000000
 
 export const revalidate = 300;
 
+// Pull hero behind fixed glass header: offsets ≈ contact bar + logo + search (+ category nav md+).
+const HERO_UNDER_HEADER =
+  "-mt-[188px] pt-[188px] sm:-mt-[188px] sm:pt-[188px] md:-mt-[236px] md:pt-[236px]";
+
 // ── Hero ───────────────────────────────────────────────────────────────────
 function Hero() {
   return (
-    <section className="relative min-h-[70vh] bg-[#111111] overflow-hidden flex items-center">
-      {/* Hero: commercial kitchen + upscale outdoor dining (panoramic) */}
-      <Image
-        src="/images/hero.png"
-        alt="Commercial Cookshack smoker in a professional kitchen and a luxury outdoor patio with a pellet grill and dining table at dusk"
-        fill
-        className="object-cover object-center"
-        priority
-        sizes="100vw"
-      />
-      {/* Dark overlay for text legibility (balanced for centered copy) */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/55 to-black/75" />
+    <section
+      className={`relative ${HERO_UNDER_HEADER} flex min-h-[88svh] items-center overflow-hidden bg-[#111111]`}
+      aria-label="Cookshack hero"
+    >
+      <HeroBackground />
+      {/* Dark overlay for text legibility */}
+      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/80 via-black/55 to-black/75" />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 text-center">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 pb-16 pt-6 text-center sm:px-6 sm:pb-20 md:px-8 md:pb-28 md:pt-8">
         <div className="flex flex-col items-center">
-          <span className="inline-flex items-center gap-2 bg-[#E85D04]/20 border border-[#E85D04]/40 text-[#F48C06] text-xs font-heading font-bold tracking-[0.2em] uppercase px-4 py-1.5 rounded-full mb-6">
-            <IconFlame className="w-4 h-4 shrink-0 text-[#F48C06]" aria-hidden />
+          <span className="inline-flex items-center justify-center gap-2 text-[#F48C06] text-xs font-heading font-bold tracking-[0.2em] uppercase mb-6">
+            <IconUserGroup className="w-4 h-4 shrink-0 text-[#F48C06]" aria-hidden />
             Since 1962 — Family Owned
           </span>
           <h1 className="font-heading font-extrabold text-white leading-none text-shadow-lg mb-6">
             <span className="block text-5xl sm:text-6xl lg:text-7xl tracking-wider">
-              NOTHING
+              NOTHING{" "}
+              <span className="text-[#E85D05]">BEATS A</span>
             </span>
-            <span className="block text-5xl sm:text-6xl lg:text-7xl tracking-wider text-[#E85D04]">
-              BEATS A
-            </span>
-            <span className="block text-5xl sm:text-6xl lg:text-7xl tracking-wider">
+            <span
+              className="block text-5xl font-extrabold leading-none tracking-wider text-white sm:text-6xl lg:text-7xl"
+              style={{
+                fontFamily: "var(--font-mesquite)",
+                fontOpticalSizing: "auto",
+                letterSpacing: "0.05em",
+              }}
+            >
               COOKSHACK!
             </span>
           </h1>
@@ -61,7 +66,7 @@ function Hero() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full">
             <Link
               href="/category/ctgy_residential_equipment"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#E85D04] text-white font-heading font-bold tracking-widest uppercase text-sm hover:bg-[#C44A00] active:scale-[0.98] transition-all rounded"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#E85D05] text-white font-heading font-bold tracking-widest uppercase text-sm hover:bg-[#C44A00] active:scale-[0.98] transition-all rounded"
             >
               Shop Residential
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,7 +75,7 @@ function Hero() {
             </Link>
             <Link
               href="/category/ctgy_commercial_products"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-[#3D3D3D] text-white font-heading font-bold tracking-widest uppercase text-sm hover:border-[#E85D04] hover:text-[#E85D04] transition-all rounded"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-[#3D3D3D] text-white font-heading font-bold tracking-widest uppercase text-sm hover:border-[#E85D05] hover:text-[#E85D05] transition-all rounded"
             >
               Shop Commercial
             </Link>
@@ -86,14 +91,14 @@ const SHOP_SPLIT_COLUMNS = [
   {
     title: "Pro-Grade Grills & Smokers",
     href: "/category/ctgy_commercial_products",
-    image: IMG("Cooking_Meat.jpg"),
-    alt: "Cookshack commercial smokers and grills",
+    image: "/images/shop-commercial.png",
+    alt: "Chef using a Cookshack commercial smoker in a professional kitchen",
   },
   {
     title: "Home Grills & Smokers",
     href: "/category/ctgy_residential_equipment",
-    image: IMG("Smokers-and-Grills_3.png"),
-    alt: "Cookshack residential smokers and grills",
+    image: "/images/shop-residential.png",
+    alt: "Cooking with a Cookshack smoker in a backyard patio setting",
   },
 ] as const;
 
@@ -105,7 +110,7 @@ function CategoryCards() {
           <Link
             key={col.href}
             href={col.href}
-            className={`group relative flex min-h-[min(70vw,420px)] md:min-h-[min(50vw,560px)] w-full items-center justify-center overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E85D04] focus-visible:ring-inset ${
+            className={`group relative flex min-h-[min(70vw,420px)] md:min-h-[min(50vw,560px)] w-full items-center justify-center overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E85D05] focus-visible:ring-inset ${
               index === 1 ? "md:border-l border-white/10" : ""
             }`}
           >
@@ -113,16 +118,15 @@ function CategoryCards() {
               src={col.image}
               alt={col.alt}
               fill
-              className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, 50vw"
-              unoptimized
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-black/30 group-hover:via-black/50 transition-colors duration-300" />
             <div className="relative z-10 flex flex-col items-center justify-center px-6 py-16 text-center">
               <h2 className="font-heading font-extrabold text-3xl sm:text-4xl md:text-5xl text-white tracking-wider uppercase leading-tight max-w-lg text-shadow-lg">
                 {col.title}
               </h2>
-              <span className="mt-6 inline-flex items-center gap-2 text-[#E85D04] font-heading font-bold text-sm tracking-widest uppercase group-hover:gap-3 transition-all">
+              <span className="mt-6 inline-flex items-center gap-2 text-[#E85D05] font-heading font-bold text-sm tracking-widest uppercase group-hover:gap-3 transition-all">
                 Shop now
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -149,13 +153,13 @@ function FeaturedProductFallback() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 relative z-10">
         <div className="grid md:grid-cols-2 gap-10 items-center">
           <div>
-            <span className="inline-flex items-center gap-2 bg-[#E85D04]/20 border border-[#E85D04]/40 text-[#F48C06] text-[10px] font-heading font-bold tracking-[0.25em] uppercase px-3 py-1 rounded-full mb-4">
+            <span className="inline-flex items-center gap-2 text-[#F48C06] text-[10px] font-heading font-bold tracking-[0.25em] uppercase mb-4">
               <IconPizza className="w-4 h-4 shrink-0 text-[#F48C06]" aria-hidden />
               Wood fire — pizza ovens
             </span>
             <h2 className="font-heading font-extrabold text-white text-4xl sm:text-5xl tracking-wider uppercase leading-none mb-4">
               Wood Fire<br />
-              <span className="text-[#E85D04]">Pizza Oven</span>
+              <span className="text-[#E85D05]">Pizza Oven</span>
             </h2>
             <p className="text-[#9A9A9A] text-base leading-relaxed mb-6 max-w-md">
               Bring artisan-quality, wood-fired pizza to your commercial kitchen or backyard.
@@ -163,7 +167,7 @@ function FeaturedProductFallback() {
             </p>
             <Link
               href="/category/sub_ctgy_pizza_oven"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-[#E85D04] text-white font-heading font-bold tracking-widest uppercase text-sm hover:bg-[#C44A00] transition rounded"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-[#E85D05] text-white font-heading font-bold tracking-widest uppercase text-sm hover:bg-[#C44A00] transition rounded"
             >
               Explore pizza ovens
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -230,7 +234,7 @@ async function FeaturedProduct() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 relative z-10">
         <div className="grid md:grid-cols-2 gap-10 items-center">
           <div>
-            <span className="inline-flex items-center gap-2 bg-[#E85D04]/20 border border-[#E85D04]/40 text-[#F48C06] text-[10px] font-heading font-bold tracking-[0.25em] uppercase px-3 py-1 rounded-full mb-4">
+            <span className="inline-flex items-center gap-2 text-[#F48C06] text-[10px] font-heading font-bold tracking-[0.25em] uppercase mb-4">
               {isPizzaSpotlight ? (
                 <IconPizza className="w-4 h-4 shrink-0 text-[#F48C06]" aria-hidden />
               ) : (
@@ -242,7 +246,7 @@ async function FeaturedProduct() {
               {product.name}
             </h2>
             {product.formatted_price && (
-              <p className="font-heading font-extrabold text-2xl text-[#E85D04] mb-4">
+              <p className="font-heading font-extrabold text-2xl text-[#E85D05] mb-4">
                 {product.formatted_price}
               </p>
             )}
@@ -253,7 +257,7 @@ async function FeaturedProduct() {
             <div className="flex flex-col sm:flex-row flex-wrap gap-3">
               <Link
                 href={`/shop/${encodeURIComponent(product.code)}`}
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#E85D04] text-white font-heading font-bold tracking-widest uppercase text-sm hover:bg-[#C44A00] transition rounded"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#E85D05] text-white font-heading font-bold tracking-widest uppercase text-sm hover:bg-[#C44A00] transition rounded"
               >
                 Shop now
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -263,7 +267,7 @@ async function FeaturedProduct() {
               {isPizzaSpotlight && (
                 <Link
                   href="/category/sub_ctgy_pizza_oven"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-[#3D3D3D] text-white font-heading font-bold tracking-widest uppercase text-sm hover:border-[#E85D04] hover:text-[#E85D04] transition rounded"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-[#3D3D3D] text-white font-heading font-bold tracking-widest uppercase text-sm hover:border-[#E85D05] hover:text-[#E85D05] transition rounded"
                 >
                   All pizza ovens
                 </Link>
@@ -277,7 +281,7 @@ async function FeaturedProduct() {
               productCode={product.code}
               productName={product.name}
               fill
-              className="object-contain p-6 md:p-8"
+              className="object-contain bg-white p-6 md:p-8"
               sizes="(max-width: 768px) 100vw, 50vw"
               priority
             />
@@ -310,24 +314,24 @@ const TESTIMONIALS = [
 
 function Testimonials() {
   return (
-    <section className="bg-[#F5F0EB] py-16 sm:py-20">
+    <section className="bg-[#F7F7F7] py-16 sm:py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="font-heading font-extrabold text-4xl sm:text-5xl text-[#1A1A1A] tracking-wider uppercase">
             What Our Customers Are Saying
           </h2>
-          <div className="w-16 h-1 bg-[#E85D04] mx-auto mt-3" />
+          <div className="w-16 h-1 bg-[#E85D05] mx-auto mt-3" />
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {TESTIMONIALS.map((t, i) => (
             <div
               key={i}
-              className="bg-white border border-[#E8E0D8] rounded p-7 flex flex-col gap-5 shadow-sm hover:shadow-md hover:border-[#E85D04]/30 transition"
+              className="bg-white border border-[#E8E0D8] rounded p-7 flex flex-col gap-5 shadow-sm hover:shadow-md hover:border-[#E85D05]/30 transition"
             >
               {/* Stars */}
               <div className="flex gap-1">
                 {Array.from({ length: 5 }).map((_, s) => (
-                  <svg key={s} className="w-4 h-4 fill-[#E85D04]" viewBox="0 0 20 20">
+                  <svg key={s} className="w-4 h-4 fill-[#E85D05]" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                 ))}
@@ -352,13 +356,22 @@ function Testimonials() {
 // ── Why Cookshack ─────────────────────────────────────────────────────────
 function WhyCookshack() {
   return (
-    <section className="bg-[#1A1A1A] py-16 sm:py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="relative overflow-hidden py-16 sm:py-20">
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/images/why-cookshack-bg.png')" }}
+        aria-hidden
+      />
+      <div
+        className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/90 via-[#1A1A1A]/82 to-[#0a0a0a]/92"
+        aria-hidden
+      />
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-14">
           <h2 className="font-heading font-extrabold text-4xl sm:text-5xl text-white tracking-wider uppercase">
             Why Cookshack?
           </h2>
-          <div className="w-16 h-1 bg-[#E85D04] mx-auto mt-3" />
+          <div className="w-16 h-1 bg-[#E85D05] mx-auto mt-3" />
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {(
@@ -387,13 +400,13 @@ function WhyCookshack() {
           ).map(({ Icon, title, desc }) => (
             <div
               key={title}
-              className="bg-[#111111] border border-[#2B2B2B] rounded p-6 hover:border-[#E85D04] transition group"
+              className="glass-why-card rounded-lg p-6 transition duration-300 hover:border-[#E85D05] group"
             >
-              <Icon className="w-10 h-10 text-[#E85D04] mb-4" aria-hidden />
-              <h3 className="font-heading font-bold text-white text-lg tracking-wide uppercase mb-2 group-hover:text-[#E85D04] transition">
+              <Icon className="w-10 h-10 text-[#E85D05] mb-4" aria-hidden />
+              <h3 className="font-heading font-bold text-white text-lg tracking-wide uppercase mb-2 group-hover:text-[#E85D05] transition">
                 {title}
               </h3>
-              <p className="text-[#6B6B6B] text-sm leading-relaxed">{desc}</p>
+              <p className="text-[#9A9A9A] text-sm leading-relaxed">{desc}</p>
             </div>
           ))}
         </div>
@@ -426,21 +439,21 @@ async function TopProducts() {
   if (products.length === 0) return null;
 
   return (
-    <section className="bg-[#F5F0EB] py-16 sm:py-20">
+    <section className="bg-white py-16 sm:py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-end justify-between mb-10 gap-4 flex-wrap">
           <div>
             <h2 className="font-heading font-extrabold text-4xl sm:text-5xl text-[#1A1A1A] tracking-wider uppercase leading-none">
               Top Products
             </h2>
-            <div className="w-16 h-1 bg-[#E85D04] mt-3" />
+            <div className="w-16 h-1 bg-[#E85D05] mt-3" />
             <p className="text-[#6B6B6B] text-sm mt-3 font-body">
               Discover Cookshack&apos;s industry-leading smokers, wood-fired ovens, and premium fuels.
             </p>
           </div>
           <Link
             href="/shop"
-            className="flex items-center gap-2 text-[#E85D04] font-heading font-bold text-sm tracking-widest uppercase hover:text-[#C44A00] transition"
+            className="flex items-center gap-2 text-[#E85D05] font-heading font-bold text-sm tracking-widest uppercase hover:text-[#C44A00] transition"
           >
             View All Products
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -473,7 +486,7 @@ function TrustBar() {
             ] as const
           ).map(({ Icon, label, sub }) => (
             <div key={label} className="flex items-center gap-3 py-3 sm:py-2 sm:px-6 first:pl-0">
-              <Icon className="w-7 h-7 shrink-0 text-[#E85D04]" aria-hidden />
+              <Icon className="w-7 h-7 shrink-0 text-[#E85D05]" aria-hidden />
               <div>
                 <p className="text-sm font-heading font-bold text-white tracking-wide uppercase">
                   {label}

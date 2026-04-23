@@ -3,6 +3,7 @@ import Link from "next/link";
 import { searchProducts } from "@/lib/miva-client";
 import ProductGrid from "@/components/ProductGrid";
 import Pagination from "@/components/Pagination";
+import CatalogHeroBand from "@/components/CatalogHeroBand";
 import SearchForm from "./SearchForm";
 import { IconMagnifyingGlass } from "@/components/icons";
 
@@ -41,25 +42,23 @@ export default async function SearchPage({ searchParams }: PageProps) {
 
   return (
     <>
-      <div className="bg-[#1A1A1A] border-b border-[#2B2B2B]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-          <nav className="flex items-center gap-2 text-xs text-[#6B6B6B] mb-4">
-            <Link href="/" className="hover:text-[#E85D04] transition">Home</Link>
-            <span>/</span>
-            <span className="text-[#9A9A9A]">Search</span>
-          </nav>
-          <h1 className="font-heading font-extrabold text-white text-4xl sm:text-5xl tracking-wider uppercase">
-            {query ? `Results for "${query}"` : "Search Products"}
-          </h1>
-          {totalCount > 0 && (
-            <p className="text-[#6B6B6B] text-sm mt-2">
-              {totalCount.toLocaleString()} products found
-            </p>
-          )}
-        </div>
-      </div>
+      <CatalogHeroBand paddingClassName="py-10 sm:py-14">
+        <nav className="flex items-center gap-2 text-xs text-[#6B6B6B] mb-4">
+          <Link href="/" className="hover:text-[#E85D05] transition">Home</Link>
+          <span>/</span>
+          <span className="text-[#9A9A9A]">Search</span>
+        </nav>
+        <h1 className="font-heading font-extrabold text-white text-4xl sm:text-5xl tracking-wider uppercase">
+          {query ? `Results for "${query}"` : "Search Products"}
+        </h1>
+        {totalCount > 0 && (
+          <p className="text-[#6B6B6B] text-sm mt-2">
+            {totalCount.toLocaleString()} products found
+          </p>
+        )}
+      </CatalogHeroBand>
 
-      <div className="bg-[#F5F0EB] min-h-screen">
+      <div className="bg-white min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="mb-8">
             <SearchForm initialQuery={query} />
@@ -67,7 +66,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
 
           {!query ? (
             <div className="text-center py-20">
-              <IconMagnifyingGlass className="w-16 h-16 mx-auto mb-4 text-[#E85D04]" aria-hidden />
+              <IconMagnifyingGlass className="w-16 h-16 mx-auto mb-4 text-[#E85D05]" aria-hidden />
               <p className="font-heading font-bold text-[#1A1A1A] text-xl tracking-wide uppercase mb-2">
                 Find Your Next Cookshack
               </p>

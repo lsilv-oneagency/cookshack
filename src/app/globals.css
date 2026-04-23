@@ -18,7 +18,7 @@
 
 @theme {
   /* ── Cookshack Brand Colors ── */
-  --color-cs-orange:      #E85D04;
+  --color-cs-orange:      #E85D05;
   --color-cs-orange-light:#F48C06;
   --color-cs-orange-dark: #C44A00;
   --color-cs-red:         #AE2012;
@@ -28,7 +28,7 @@
   --color-cs-ash:         #3D3D3D;
   --color-cs-gray:        #6B6B6B;
   --color-cs-muted:       #9A9A9A;
-  --color-cs-light:       #F5F0EB;
+  --color-cs-light:       #ffffff;
   --color-cs-cream:       #FFF8F0;
   --color-cs-border:      #2E2E2E;
 
@@ -43,7 +43,7 @@
   html { scroll-behavior: smooth; }
 
   body {
-    background-color: #F5F0EB;
+    background-color: #ffffff;
     color: #1A1A1A;
     font-family: var(--font-body);
     font-optical-sizing: auto;
@@ -66,6 +66,25 @@
 }
 
 @layer utilities {
+  /* Nav glass — higher opacity over light pages; lighter blur so it stays charcoal, not grey-wash */
+  .glass-header-layer {
+    background: rgba(6, 6, 8, 0.78);
+    -webkit-backdrop-filter: blur(20px) saturate(135%) brightness(1.02);
+    backdrop-filter: blur(20px) saturate(135%) brightness(1.02);
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  }
+
+  /* Why Cookshack feature tiles — frosted panels over the hero photo */
+  .glass-why-card {
+    background: rgba(8, 8, 10, 0.4);
+    -webkit-backdrop-filter: blur(28px) saturate(200%) brightness(1.04);
+    backdrop-filter: blur(28px) saturate(200%) brightness(1.04);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.11),
+      0 8px 28px rgba(0, 0, 0, 0.35);
+  }
+
   .text-shadow-sm {
     text-shadow: 0 1px 3px rgba(0,0,0,0.5);
   }

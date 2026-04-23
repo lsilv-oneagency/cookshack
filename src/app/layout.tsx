@@ -42,7 +42,8 @@ async function RootLayoutInner({ children }: { children: React.ReactNode }) {
     <CartProvider>
       <Header categories={categories} />
       <CartDrawer />
-      <main>{children}</main>
+      {/* Offset for fixed header (contact + logo/search + category nav on md+) */}
+      <main className="pt-[188px] sm:pt-[188px] md:pt-[236px]">{children}</main>
       <Footer />
     </CartProvider>
   );

@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
+import { mivaImgUrl } from "@/components/ProductImage";
 import { IconPhoto, IconShoppingCart } from "@/components/icons";
 
 export default function CartDrawer() {
@@ -48,7 +49,7 @@ export default function CartDrawer() {
               Your Cart
             </h2>
             {itemCount > 0 && (
-              <span className="bg-[#E85D04] text-white text-xs font-bold px-2 py-0.5 rounded-full">
+              <span className="bg-[#E85D05] text-white text-xs font-bold px-2 py-0.5 rounded-full">
                 {itemCount}
               </span>
             )}
@@ -68,7 +69,7 @@ export default function CartDrawer() {
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center gap-5 py-16">
-              <IconShoppingCart className="w-16 h-16 text-[#E85D04]" aria-hidden />
+              <IconShoppingCart className="w-16 h-16 text-[#E85D05]" aria-hidden />
               <div>
                 <p className="font-heading font-bold text-white text-lg tracking-wide uppercase">
                   Your cart is empty
@@ -77,25 +78,29 @@ export default function CartDrawer() {
               </div>
               <button
                 onClick={closeCart}
-                className="px-6 py-2.5 bg-[#E85D04] text-white text-xs font-heading font-bold tracking-widest uppercase hover:bg-[#C44A00] transition rounded"
+                className="px-6 py-2.5 bg-[#E85D05] text-white text-xs font-heading font-bold tracking-widest uppercase hover:bg-[#C44A00] transition rounded"
               >
                 Continue Shopping
               </button>
             </div>
           ) : (
             items.map((item) => {
-              const imgUrl = item.product_image
-                ? item.product_image.startsWith("http")
-                  ? item.product_image
-                  : `${storeUrl}${item.product_image}`
-                : null;
+              const rawImg = (item.product_image || item.product_thumbnail || "").trim();
+              const imgUrl = rawImg ? mivaImgUrl(rawImg) : "";
 
               return (
                 <div key={item.product_code} className="flex gap-4 p-3 bg-[#1A1A1A] border border-[#2B2B2B] rounded">
                   {/* Image */}
                   <div className="relative w-20 h-20 flex-shrink-0 bg-[#2B2B2B] rounded overflow-hidden">
                     {imgUrl ? (
-                      <Image src={imgUrl} alt={item.product_name} fill className="object-contain p-1.5" sizes="80px" />
+                      <Image
+                        src={imgUrl}
+                        alt={item.product_name}
+                        fill
+                        className="object-contain p-1.5"
+                        sizes="80px"
+                        unoptimized
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-[#6B6B6B]">
                         <IconPhoto className="w-8 h-8" aria-hidden />
@@ -108,14 +113,14 @@ export default function CartDrawer() {
                     <Link
                       href={`/shop/${item.product_code}`}
                       onClick={closeCart}
-                      className="text-sm font-heading font-bold text-white uppercase tracking-wide line-clamp-2 hover:text-[#E85D04] transition leading-snug"
+                      className="text-sm font-heading font-bold text-white uppercase tracking-wide line-clamp-2 hover:text-[#E85D05] transition leading-snug"
                     >
                       {item.product_name}
                     </Link>
                     {item.product_sku && (
                       <p className="text-[10px] text-[#6B6B6B] font-mono mt-0.5">{item.product_sku}</p>
                     )}
-                    <p className="text-sm font-bold text-[#E85D04] mt-1">{item.product_formatted_price}</p>
+                    <p className="text-sm font-bold text-[#E85D05] mt-1">{item.product_formatted_price}</p>
 
                     <div className="flex items-center justify-between mt-2">
                       {/* Qty */}
@@ -167,7 +172,7 @@ export default function CartDrawer() {
             </p>
             <a
               href={`${storeUrl}/checkout`}
-              className="block w-full py-4 text-center bg-[#E85D04] text-white font-heading font-bold tracking-widest uppercase text-sm hover:bg-[#C44A00] active:scale-[0.98] transition-all rounded"
+              className="block w-full py-4 text-center bg-[#E85D05] text-white font-heading font-bold tracking-widest uppercase text-sm hover:bg-[#C44A00] active:scale-[0.98] transition-all rounded"
             >
               Proceed to Checkout
             </a>
