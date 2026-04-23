@@ -40,7 +40,7 @@ export default async function ShopPage({ searchParams }: PageProps) {
       {/* Page header */}
       <CatalogHeroBand paddingClassName="py-10">
         <nav className="flex items-center gap-2 text-xs text-[#6B6B6B] mb-4">
-          <Link href="/" className="hover:text-[#AE1B07] transition">Home</Link>
+          <Link href="/" className="hover:text-[#E85D05] transition">Home</Link>
           <span>/</span>
           <span className="text-[#9A9A9A]">All Products</span>
         </nav>

@@ -68,7 +68,7 @@ export default function AddToCartButton({ product, inStock }: Props) {
           added
             ? "bg-green-700 text-white"
             : inStock
-            ? "bg-[#AE1B07] text-white hover:bg-[#8E1405]"
+            ? "bg-[#E85D05] text-white hover:bg-[#C44A00]"
             : "bg-[#D4C8BE] text-[#9A9A9A] cursor-not-allowed"
         }`}
       >
@@ -102,7 +102,7 @@ export default function AddToCartButton({ product, inStock }: Props) {
       {/* Phone CTA */}
       <p className="text-xs text-[#9A9A9A] text-center">
         Questions?{" "}
-        <a href="tel:18004230698" className="text-[#AE1B07] font-semibold hover:text-[#8E1405] transition">
+        <a href="tel:18004230698" className="text-[#E85D05] font-semibold hover:text-[#C44A00] transition">
           Call 1-800-423-0698
         </a>
       </p>

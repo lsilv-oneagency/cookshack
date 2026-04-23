@@ -64,9 +64,9 @@ export default async function ProductPage({ params }: PageProps) {
       {/* Breadcrumb bar */}
       <CatalogHeroBand paddingClassName="py-3">
         <nav className="flex items-center gap-2 text-xs text-[#6B6B6B]">
-          <Link href="/" className="hover:text-[#AE1B07] transition">Home</Link>
+          <Link href="/" className="hover:text-[#E85D05] transition">Home</Link>
           <span>/</span>
-          <Link href="/shop" className="hover:text-[#AE1B07] transition">Shop</Link>
+          <Link href="/shop" className="hover:text-[#E85D05] transition">Shop</Link>
           <span>/</span>
           <span className="text-[#9A9A9A] truncate max-w-xs">{product.name}</span>
         </nav>
@@ -95,7 +95,7 @@ export default async function ProductPage({ params }: PageProps) {
                   {images.slice(0, 4).map((img, i) => (
                     <div
                       key={i}
-                      className="relative aspect-square bg-white border border-[#E8E0D8] rounded overflow-hidden hover:border-[#AE1B07] transition cursor-pointer"
+                      className="relative aspect-square bg-white border border-[#E8E0D8] rounded overflow-hidden hover:border-[#E85D05] transition cursor-pointer"
                     >
                       <Image
                         src={img}
@@ -159,7 +159,7 @@ export default async function ProductPage({ params }: PageProps) {
                   ] as const
                 ).map(({ Icon, label, sub }) => (
                   <div key={label} className="bg-white border border-[#E8E0D8] rounded p-3 text-center">
-                    <div className="flex justify-center mb-1 text-[#AE1B07]">
+                    <div className="flex justify-center mb-1 text-[#E85D05]">
                       <Icon className="w-6 h-6" aria-hidden />
                     </div>
                     <p className="text-[10px] font-heading font-bold text-[#1A1A1A] uppercase tracking-wider">{label}</p>
@@ -175,7 +175,7 @@ export default async function ProductPage({ params }: PageProps) {
                     Description
                   </h2>
                   <div
-                    className="prose prose-sm max-w-none text-[#3D3D3D] leading-relaxed prose-headings:font-heading prose-headings:uppercase prose-headings:tracking-wide prose-a:text-[#AE1B07] prose-a:no-underline hover:prose-a:underline"
+                    className="prose prose-sm max-w-none text-[#3D3D3D] leading-relaxed prose-headings:font-heading prose-headings:uppercase prose-headings:tracking-wide prose-a:text-[#E85D05] prose-a:no-underline hover:prose-a:underline"
                     dangerouslySetInnerHTML={{ __html: product.descrip }}
                   />
                 </div>
@@ -191,7 +191,7 @@ export default async function ProductPage({ params }: PageProps) {
                   <h2 className="font-heading font-extrabold text-3xl sm:text-4xl text-[#1A1A1A] tracking-wider uppercase">
                     You Might Also Like
                   </h2>
-                  <div className="w-12 h-1 bg-[#AE1B07] mt-2" />
+                  <div className="w-12 h-1 bg-[#E85D05] mt-2" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">

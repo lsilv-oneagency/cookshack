@@ -22,12 +22,12 @@ export default function SearchForm({ initialQuery = "" }: { initialQuery?: strin
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search smokers, grills, accessories, sauces..."
-          className="w-full pl-5 pr-14 py-4 text-base bg-white border border-[#D4C8BE] rounded focus:outline-none focus:ring-2 focus:ring-[#AE1B07] focus:border-transparent transition text-[#1A1A1A] placeholder-[#9A9A9A]"
+          className="w-full pl-5 pr-14 py-4 text-base bg-white border border-[#D4C8BE] rounded focus:outline-none focus:ring-2 focus:ring-[#E85D05] focus:border-transparent transition text-[#1A1A1A] placeholder-[#9A9A9A]"
           autoFocus
         />
         <button
           type="submit"
-          className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#AE1B07] text-white rounded flex items-center justify-center hover:bg-[#8E1405] transition"
+          className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#E85D05] text-white rounded flex items-center justify-center hover:bg-[#C44A00] transition"
           aria-label="Search"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

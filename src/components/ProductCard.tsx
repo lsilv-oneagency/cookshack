@@ -98,7 +98,7 @@ export default function ProductCard({ product, categoryLabel }: ProductCardProps
           type="button"
           onClick={handleAdd}
           disabled={adding || isLoading || !inStock}
-          className="mt-auto flex w-full items-center justify-center gap-2 rounded-xl bg-[#AE1B07] py-3.5 text-sm font-bold text-white transition hover:bg-[#8E1405] disabled:cursor-not-allowed disabled:opacity-50"
+          className="mt-auto flex w-full items-center justify-center gap-2 rounded-xl bg-[#E85D05] py-3.5 text-sm font-bold text-white transition hover:bg-[#C44A00] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {adding ? (
             <>

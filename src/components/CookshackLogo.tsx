@@ -14,7 +14,7 @@ const WORDMARK_MASK_STYLE: CSSProperties = {
 
 type WordmarkProps = {
   className?: string;
-  /** Use inside a parent with `group` (e.g. home link) for brand-color hover. */
+  /** Use inside a parent with `group` (e.g. home link) for orange hover. */
   interactive?: boolean;
 };
 
@@ -22,7 +22,7 @@ type WordmarkProps = {
 export function CookshackWordmark({ className = "", interactive = false }: WordmarkProps) {
   return (
     <span
-      className={`block w-auto shrink-0 bg-white ${interactive ? "transition-colors duration-200 group-hover:bg-[#AE1B07]" : ""} ${className}`.trim()}
+      className={`block w-auto shrink-0 bg-white ${interactive ? "transition-colors duration-200 group-hover:bg-[#E85D05]" : ""} ${className}`.trim()}
       style={WORDMARK_MASK_STYLE}
       aria-hidden
     />
