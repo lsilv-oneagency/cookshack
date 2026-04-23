@@ -1,0 +1,8 @@
+# Next.js App Router on Netlify — uses the automatic Next.js runtime (OpenNext).
+# Do NOT set a "Publish directory" in the Netlify UI for this project (leave default / auto).
+
+[build]
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "22"
