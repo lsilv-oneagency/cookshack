@@ -54,7 +54,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
       <>
         <CatalogHeroBand paddingClassName="py-10 sm:py-14">
           <nav className="flex items-center gap-2 text-xs text-[#6B6B6B] mb-4">
-            <Link href="/" className="hover:text-[#E85D05] transition">
+            <Link href="/" className="hover:text-[#D52324] transition">
               Home
             </Link>
             <span>/</span>
@@ -73,7 +73,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
             </p>
             <Link
               href="/shop"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#E85D05] text-white font-heading font-bold tracking-widest uppercase text-sm rounded hover:bg-[#C44A00] transition"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#D52324] text-white font-heading font-bold tracking-widest uppercase text-sm rounded hover:brightness-[0.94] transition"
             >
               Back to shop
             </Link>
@@ -100,9 +100,9 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
       {/* Category header */}
       <CatalogHeroBand paddingClassName="py-10 sm:py-14">
         <nav className="flex items-center gap-2 text-xs text-[#6B6B6B] mb-4">
-          <Link href="/" className="hover:text-[#E85D05] transition">Home</Link>
+          <Link href="/" className="hover:text-[#D52324] transition">Home</Link>
           <span>/</span>
-          <Link href="/shop" className="hover:text-[#E85D05] transition">Shop</Link>
+          <Link href="/shop" className="hover:text-[#D52324] transition">Shop</Link>
           <span>/</span>
           <span className="text-[#9A9A9A]">{category.name}</span>
         </nav>

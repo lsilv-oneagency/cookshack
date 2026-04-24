@@ -22,7 +22,7 @@ export default function NothingBeatsCallout() {
           <div className="text-center md:text-left">
             <h2
               id="nothing-beats-callout-heading"
-              className="font-heading text-4xl font-extrabold normal-case leading-[1.1] text-[#D32F2F] sm:text-5xl lg:text-6xl"
+              className="font-heading text-4xl font-extrabold normal-case leading-[1.1] text-[#D52324] sm:text-5xl lg:text-6xl"
             >
               Nothing beats a Cookshack!
             </h2>

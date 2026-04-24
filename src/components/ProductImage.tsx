@@ -9,17 +9,17 @@ function getProductType(code: string, name: string) {
   const n = name.toUpperCase();
 
   if (c.startsWith("SM") || n.includes("SMOKETTE") || n.includes("AMERIQUE") || (n.includes("SMOKER") && !n.includes("RECIPE")))
-    return { label: "Smoker Oven", accent: "#E85D05" };
+    return { label: "Smoker Oven", accent: "#D52324" };
   if (c.startsWith("FEC") || n.includes("FAST EDDY"))
-    return { label: "Commercial", accent: "#C44A00" };
+    return { label: "Commercial", accent: "#D52324" };
   if (c.startsWith("PG") || (n.includes("PELLET") && n.includes("GRILL")))
-    return { label: "Pellet Grill", accent: "#F48C06" };
+    return { label: "Pellet Grill", accent: "#D52324" };
   if (n.includes("PIZZA") || n.includes("WOOD FIRE"))
     return { label: "Pizza Oven", accent: "#AE2012" };
   if (n.includes("SAUCE") || n.includes("SPICE") || n.includes("RUB"))
-    return { label: "Sauces", accent: "#E85D05" };
+    return { label: "Sauces", accent: "#D52324" };
   if (n.includes("WOOD") || (n.includes("PELLET") && !c.startsWith("PG")))
-    return { label: "Wood & Pellets", accent: "#C44A00" };
+    return { label: "Wood & Pellets", accent: "#D52324" };
   if (n.includes("RECIPE") || c.startsWith("RECIPES_"))
     return { label: "Recipe", accent: "#4A7A3A" };
   if (n.includes("COOKBOOK"))
@@ -27,7 +27,7 @@ function getProductType(code: string, name: string) {
   if (c.startsWith("PV") || c.startsWith("PM") || c.startsWith("PA") || n.includes("FUSE") || n.includes("CASTER") || n.includes("SHAFT") || n.includes("MOTOR"))
     return { label: "Part", accent: "#6B6B6B" };
 
-  return { label: "Product", accent: "#E85D05" };
+  return { label: "Product", accent: "#D52324" };
 }
 
 // Build a proxied URL for any image path (handles Basic Auth transparently)

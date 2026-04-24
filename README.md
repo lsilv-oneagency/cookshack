@@ -6,9 +6,7 @@ A ground-up rebuild of cookshack.com using the **Miva JSON API** as the data lay
 
 | Token | Value |
 |---|---|
-| Brand orange | `#E85D05` |
-| Dark orange | `#C44A00` |
-| Light orange | `#F48C06` |
+| Brand (primary) | `#D52324` |
 | Charcoal (bg) | `#111111` |
 | Dark surface | `#1A1A1A` |
 | Smoke | `#2B2B2B` |
