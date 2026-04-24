@@ -90,7 +90,7 @@ export default async function ProductPage({ params }: PageProps) {
     return (
       <>
         <PdpBreadcrumb productName="Product" />
-        <div className="min-h-[50vh] bg-[#F3F3F3]">
+        <div className="relative isolate z-0 min-h-[50vh] bg-[#F3F3F3]">
           <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:px-8">
             <p className="mb-3 font-heading font-bold uppercase tracking-wide text-[#1A1A1A]">Unable to load product</p>
             <p className="mb-6 mx-auto max-w-md text-[#6B6B6B]">{loadError}</p>
@@ -248,7 +248,7 @@ export default async function ProductPage({ params }: PageProps) {
     <>
       <PdpBreadcrumb productName={product.name} />
 
-      <div className="min-h-screen bg-[#F3F3F3]">
+      <div className="relative isolate z-0 min-h-screen bg-[#F3F3F3]">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
           <div className="rounded-md border border-neutral-200 bg-white p-4 shadow-sm sm:p-6 lg:grid lg:grid-cols-2 lg:gap-8 lg:p-8">
             <ProductDetailGallery

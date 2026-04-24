@@ -11,7 +11,6 @@ import type { MivaProduct } from "@/types/miva";
 import { IconPhone } from "@/components/icons";
 import ProductImage from "@/components/ProductImage";
 import { CookshackLogoLockup } from "@/components/CookshackLogo";
-import HeaderSmokeVideo from "@/components/HeaderSmokeVideo";
 
 type NavItem = {
   label: string;
@@ -186,8 +185,7 @@ export default function Header() {
           scrolled ? "shadow-[0_12px_40px_rgba(0,0,0,0.45)]" : ""
         }`}
       >
-        <HeaderSmokeVideo />
-        <div className="relative z-[1]">
+        <div className="relative">
         {/* ── Contact bar: same scroll show/hide as search — heritage + commercial + services + account + cart ── */}
         <div
           className={`grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none ${
@@ -375,7 +373,7 @@ export default function Header() {
 
         {/* ── Desktop nav + mega menu (products per category) ─────────────── */}
         <div
-          className="relative hidden w-full md:block"
+          className="relative z-20 hidden w-full md:block"
           onMouseLeave={scheduleCloseMega}
         >
           <nav className="w-full border-t border-white/10" aria-label="Shop categories">
@@ -436,7 +434,7 @@ export default function Header() {
 
           {megaLabel && activeMegaItem?.categoryCode && (
             <div
-              className="mega-menu-panel absolute left-0 right-0 top-full z-50 border-t border-neutral-200 border-b border-neutral-200"
+              className="mega-menu-panel absolute left-0 right-0 top-full z-[200] border-t border-neutral-200 border-b border-neutral-200"
               onMouseEnter={cancelCloseMega}
             >
               <div className="mx-auto max-w-7xl px-3 pt-3 pb-5 sm:px-4 sm:pt-3 sm:pb-6 lg:px-6">

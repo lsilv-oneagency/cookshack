@@ -2,10 +2,10 @@
 
 import type { ReactNode } from "react";
 import HeroBackground from "@/components/HeroBackground";
+import { pullUnderHeaderClass } from "@/lib/header-offset";
 
-/** Match `main` offset in `layout.tsx` — pull band under fixed glass header so backdrop + media read together. */
-const UNDER_FIXED_HEADER =
-  "-mt-[188px] pt-[188px] sm:-mt-[188px] sm:pt-[188px] md:-mt-[236px] md:pt-[236px]";
+/** Match `<main>` offset in `layout.tsx` — pull band under fixed glass header so backdrop + media read together. */
+const UNDER_FIXED_HEADER = pullUnderHeaderClass;
 
 /** Catalog / shop header — `hero-grill-sausages.mp4` under glass + scrim (same asset as home hero). */
 export default function CatalogHeroBand({

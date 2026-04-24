@@ -63,6 +63,17 @@
     font-family: var(--font-body);
     font-optical-sizing: auto;
   }
+
+  /**
+   * PDP breadcrumb: in-flow only (not sticky). Sticky caused the product column to scroll
+   * underneath the bar so the H1 and gallery read as “floating over” the product.
+   */
+  .cookshack-breadcrumb {
+    position: relative;
+    z-index: 0;
+    width: 100%;
+    background-color: #f0f2f2;
+  }
 }
 
 @layer utilities {

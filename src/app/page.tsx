@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getProducts, getCategoryProducts } from "@/lib/miva-client";
-import { getPrimaryProductImagePath } from "@/lib/miva-product-images";
 import { filterStorefrontProducts } from "@/lib/miva-storefront-visibility";
 import BrowseProductsWithFilters from "@/components/BrowseProductsWithFilters";
 import ProductImage from "@/components/ProductImage";
@@ -11,16 +10,8 @@ import ShopCategoryStrip from "@/components/ShopCategoryStrip";
 import HeroBackground from "@/components/HeroBackground";
 import type { Metadata } from "next";
 import type { MivaProduct } from "@/types/miva";
-import {
-  IconCog,
-  IconFlame,
-  IconPizza,
-  IconTrophy,
-  IconUserGroup,
-} from "@/components/icons";
-
-const IMG = (p: string) => `/api/img?p=${encodeURIComponent(`mm5/graphics/00000001/1/${p}`)}`;
-
+import { IconCog, IconFlame, IconTrophy, IconUserGroup } from "@/components/icons";
+import { pullUnderHeaderClass } from "@/lib/header-offset";
 
 export const revalidate = 300;
 
@@ -54,9 +45,8 @@ export const metadata: Metadata = {
   },
 };
 
-// Pull hero behind fixed glass header: offsets ≈ contact bar + logo + search (+ category nav md+).
-const HERO_UNDER_HEADER =
-  "-mt-[188px] pt-[188px] sm:-mt-[188px] sm:pt-[188px] md:-mt-[236px] md:pt-[236px]";
+// Pull hero behind fixed glass header — values match `mainHeaderOffsetClass` in layout.
+const HERO_UNDER_HEADER = pullUnderHeaderClass;
 
 // ── Hero ───────────────────────────────────────────────────────────────────
 function Hero() {
@@ -177,141 +167,51 @@ function CategoryCards() {
   );
 }
 
-function stripHtml(html: string): string {
-  if (!html) return "";
-  return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-}
+/** Home featured spotlight copy — not driven by the Miva API (links + image use the same `productCode` as the PDP). */
+const HOME_FEATURED_SPOTLIGHT = {
+  /** Must match a live Miva `product.code` so `/shop/{code}` and `mm5/graphics/00000001/1/{code}.(png|jpg)` resolve. */
+  productCode: "SM025",
+  eyebrow: "Featured product",
+  title: "Smokette Elite, SS with digital controller and meat probe",
+  price: "$1,285.20",
+  description:
+    "Industry-leading Cookshack equipment — engineered for performance, reliability, and legendary smoke flavor.",
+  imageAlt: "Cookshack Smokette Elite electric smoker, stainless with digital control",
+} as const;
 
-/** When Miva returns no featured / pizza product (e.g. local dev). */
-function FeaturedProductFallback() {
+function FeaturedProduct() {
+  const { productCode, eyebrow, title, price, description, imageAlt } = HOME_FEATURED_SPOTLIGHT;
+  const shopPath = `/shop/${encodeURIComponent(productCode)}`;
+
   return (
     <section className="relative overflow-hidden bg-white">
       <div className="relative z-0 mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
         <div className="grid md:grid-cols-2 gap-10 items-center">
           <div>
             <span className="inline-flex items-center gap-2 text-[#D52324] text-[10px] font-heading font-bold tracking-[0.25em] uppercase mb-4">
-              <IconPizza className="w-4 h-4 shrink-0 text-[#D52324]" aria-hidden />
-              Wood fire — pizza ovens
+              <IconFlame className="w-4 h-4 shrink-0 text-[#D52324]" aria-hidden />
+              {eyebrow}
             </span>
-            <h2 className="font-heading font-extrabold text-[#1A1A1A] text-4xl sm:text-5xl tracking-wider uppercase leading-none mb-4">
-              Wood Fire<br />
-              <span className="text-[#D52324]">Pizza Oven</span>
+            <h2 className="font-heading font-extrabold text-[#1A1A1A] text-3xl sm:text-4xl lg:text-5xl tracking-wider uppercase leading-tight mb-3">
+              {title}
             </h2>
-            <p className="text-[#565959] text-base leading-relaxed mb-6 max-w-md">
-              Bring artisan-quality, wood-fired pizza to your commercial kitchen or backyard.
-              Authentic char. Incredible crust. Only from Cookshack.
-            </p>
+            <p className="font-heading font-extrabold text-2xl text-[#D52324] mb-4">{price}</p>
+            <p className="text-[#565959] text-base leading-relaxed mb-6 max-w-md">{description}</p>
             <Link
-              href="/category/sub_ctgy_pizza_oven"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-[#D52324] text-white font-heading font-bold tracking-widest uppercase text-sm hover:brightness-[0.94] transition rounded"
+              href={shopPath}
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#D52324] text-white font-heading font-bold tracking-widest uppercase text-sm hover:brightness-[0.94] transition rounded"
             >
-              Explore pizza ovens
+              Shop now
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
             </Link>
           </div>
-          <div className="relative hidden h-72 w-full overflow-hidden rounded-xl border border-[#E8E0D8] bg-white md:block">
-            <Image
-              src={IMG("Pizza_Oven_Promo_3.jpg")}
-              alt="Cookshack wood fire pizza oven"
-              fill
-              className="object-cover rounded-xl"
-              unoptimized
-            />
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/**
- * Featured spotlight — mirrors cookshack.com hero merchandising:
- * first active product in `cat_featured_products`, else first in `sub_ctgy_pizza_oven`.
- */
-async function FeaturedProduct() {
-  let product: MivaProduct | null = null;
-  try {
-    const featured = await getCategoryProducts("cat_featured_products", {
-      count: 20,
-      sort: "disp_order",
-    });
-    const sellable = filterStorefrontProducts(featured.data || []);
-    product = sellable[0] ?? null;
-    if (!product) {
-      const pizza = await getCategoryProducts("sub_ctgy_pizza_oven", {
-        count: 20,
-        sort: "disp_order",
-      });
-      const sellablePizza = filterStorefrontProducts(pizza.data || []);
-      product = sellablePizza[0] ?? null;
-    }
-  } catch {
-    product = null;
-  }
-
-  if (!product) {
-    return <FeaturedProductFallback />;
-  }
-
-  const plain = stripHtml(product.descrip || "");
-  const excerpt =
-    plain.length > 220 ? `${plain.slice(0, 217).trimEnd()}…` : plain;
-  const isPizzaSpotlight = /pizza|wood\s*fire/i.test(product.name);
-  const imgPath = getPrimaryProductImagePath(product);
-
-  return (
-    <section className="relative overflow-hidden bg-white">
-      <div className="relative z-0 mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-        <div className="grid md:grid-cols-2 gap-10 items-center">
-          <div>
-            <span className="inline-flex items-center gap-2 text-[#D52324] text-[10px] font-heading font-bold tracking-[0.25em] uppercase mb-4">
-              {isPizzaSpotlight ? (
-                <IconPizza className="w-4 h-4 shrink-0 text-[#D52324]" aria-hidden />
-              ) : (
-                <IconFlame className="w-4 h-4 shrink-0 text-[#D52324]" aria-hidden />
-              )}
-              {isPizzaSpotlight ? "Wood fire — featured" : "Featured product"}
-            </span>
-            <h2 className="font-heading font-extrabold text-[#1A1A1A] text-3xl sm:text-4xl lg:text-5xl tracking-wider uppercase leading-tight mb-3">
-              {product.name}
-            </h2>
-            {product.formatted_price && (
-              <p className="font-heading font-extrabold text-2xl text-[#D52324] mb-4">
-                {product.formatted_price}
-              </p>
-            )}
-            <p className="text-[#565959] text-base leading-relaxed mb-6 max-w-md">
-              {excerpt ||
-                "Industry-leading Cookshack equipment — engineered for performance, reliability, and legendary smoke flavor."}
-            </p>
-            <div className="flex flex-col sm:flex-row flex-wrap gap-3">
-              <Link
-                href={`/shop/${encodeURIComponent(product.code)}`}
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#D52324] text-white font-heading font-bold tracking-widest uppercase text-sm hover:brightness-[0.94] transition rounded"
-              >
-                Shop now
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </Link>
-              {isPizzaSpotlight && (
-                <Link
-                  href="/category/sub_ctgy_pizza_oven"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-[#3D3D3D] text-[#1A1A1A] font-heading font-bold tracking-widest uppercase text-sm hover:border-[#D52324] hover:text-[#D52324] transition rounded"
-                >
-                  All pizza ovens
-                </Link>
-              )}
-            </div>
-          </div>
           <div className="relative h-72 w-full overflow-hidden rounded-xl border border-[#E8E0D8] bg-white md:h-96">
             <ProductImage
-              src={imgPath}
-              alt={product.name}
-              productCode={product.code}
-              productName={product.name}
+              alt={imageAlt}
+              productCode={productCode}
+              productName={title}
               fill
               className="object-contain bg-white p-6 md:p-8"
               sizes="(max-width: 768px) 100vw, 50vw"

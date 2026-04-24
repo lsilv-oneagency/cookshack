@@ -6,6 +6,7 @@ import CartDrawer from "@/components/CartDrawer";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FooterRevealHost from "@/components/FooterRevealHost";
+import { mainHeaderOffsetClass } from "@/lib/header-offset";
 
 // Outfit (variable, 100–900) — same family as fonts.googleapis.com/css2?family=Outfit
 const outfit = Outfit({
@@ -41,7 +42,7 @@ async function RootLayoutInner({ children }: { children: React.ReactNode }) {
     <CartProvider>
       <Header />
       <CartDrawer />
-      <main className="relative z-10 min-h-[100dvh] bg-white pt-[188px] sm:pt-[188px] md:pt-[236px]">
+      <main className={`relative z-10 min-h-[100dvh] bg-white ${mainHeaderOffsetClass}`}>
         {children}
       </main>
       <FooterRevealHost>
