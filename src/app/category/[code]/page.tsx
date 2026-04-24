@@ -1,16 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getCategoryByCode, getCategoryProducts } from "@/lib/miva-client";
+import { getAllCategoryProducts, getCategories, getCategoryByCode } from "@/lib/miva-client";
 import { filterStorefrontProducts } from "@/lib/miva-storefront-visibility";
-import ProductGrid from "@/components/ProductGrid";
-import Pagination from "@/components/Pagination";
 import CatalogHeroBand from "@/components/CatalogHeroBand";
-import SortSelect from "./SortSelect";
+import CategoryShopClient from "@/components/category/CategoryShopClient";
 
 interface PageProps {
   params: Promise<{ code: string }>;
-  searchParams: Promise<{ sort?: string; offset?: string }>;
+  searchParams: Promise<{ sort?: string }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -27,19 +25,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-const PAGE_SIZE = 24;
-
 export default async function CategoryPage({ params, searchParams }: PageProps) {
   const { code } = await params;
   const sp = await searchParams;
-  const sort = sp.sort || "name";
-  const offset = parseInt(sp.offset || "0");
+  const initialSort = sp.sort || "name";
 
   const decodedCode = decodeURIComponent(code);
 
   let category: Awaited<ReturnType<typeof getCategoryByCode>>["data"];
-  let products: Awaited<ReturnType<typeof getCategoryProducts>>["data"] = [];
-  let totalCount = 0;
+  let products: Awaited<ReturnType<typeof getAllCategoryProducts>> = [];
+  let allCategories: Awaited<ReturnType<typeof getCategories>>["data"] = [];
   let error = "";
   let categoryLoadError = "";
 
@@ -89,9 +84,12 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   }
 
   try {
-    const prodRes = await getCategoryProducts(decodedCode, { count: PAGE_SIZE, offset, sort });
-    products = filterStorefrontProducts(prodRes.data || []);
-    totalCount = prodRes.total_count || 0;
+    const [rawProducts, catsRes] = await Promise.all([
+      getAllCategoryProducts(decodedCode, "name"),
+      getCategories(),
+    ]);
+    products = filterStorefrontProducts(rawProducts);
+    allCategories = catsRes.data || [];
   } catch (e) {
     error = e instanceof Error ? e.message : "Failed to load products";
   }
@@ -116,35 +114,28 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
             dangerouslySetInnerHTML={{ __html: category.descrip }}
           />
         )}
-        {totalCount > 0 && (
+        {products.length > 0 && (
           <p className="text-[#6B6B6B] text-xs mt-3">
-            {totalCount.toLocaleString()} products
+            {products.length.toLocaleString()} products
           </p>
         )}
       </CatalogHeroBand>
 
       <div className="bg-white min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          {/* Sort controls */}
-          <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-            <p className="text-sm text-[#6B6B6B]">
-              {totalCount > 0 && `Showing ${offset + 1}–${Math.min(offset + PAGE_SIZE, totalCount)} of ${totalCount}`}
-            </p>
-            <div className="flex items-center gap-3">
-              <label htmlFor="sort" className="text-sm text-[#6B6B6B] font-medium">Sort:</label>
-              <SortSelect value={sort} />
-            </div>
-          </div>
-
           {error ? (
             <div className="bg-white border border-red-200 rounded p-8 text-center">
               <p className="font-heading font-bold text-red-700 uppercase tracking-wide">{error}</p>
             </div>
           ) : (
-            <ProductGrid products={products} categoryLabel={category.name} />
+            <CategoryShopClient
+              products={products}
+              categoryName={category.name}
+              currentCategoryCode={category.code}
+              allCategories={allCategories}
+              initialSort={initialSort}
+            />
           )}
-
-          <Pagination total={totalCount} count={PAGE_SIZE} offset={offset} />
         </div>
       </div>
     </>

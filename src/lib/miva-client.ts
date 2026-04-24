@@ -10,6 +10,7 @@ import type {
   SearchFilter,
 } from "@/types/miva";
 import {
+  filterStorefrontProducts,
   isNonPurchasableStorefrontProduct,
   isPdpRelatedPair,
 } from "@/lib/miva-storefront-visibility";
@@ -216,6 +217,35 @@ export async function getCategoryProducts(
   });
 }
 
+const CATEGORY_PRODUCT_PAGE_SIZE = 100;
+const MAX_CATEGORY_PRODUCTS = 20_000;
+
+/**
+ * Fetches every active product in a category (paged) for client-side filter/sort.
+ */
+export async function getAllCategoryProducts(
+  categoryCode: string,
+  sort: string = "name"
+): Promise<MivaProduct[]> {
+  const all: MivaProduct[] = [];
+  let offset = 0;
+  while (all.length < MAX_CATEGORY_PRODUCTS) {
+    const res = await getCategoryProducts(categoryCode, {
+      count: CATEGORY_PRODUCT_PAGE_SIZE,
+      offset,
+      sort,
+    });
+    const batch = res.data || [];
+    if (batch.length === 0) break;
+    for (const p of batch) {
+      all.push(p);
+    }
+    if (batch.length < CATEGORY_PRODUCT_PAGE_SIZE) break;
+    offset += batch.length;
+  }
+  return all;
+}
+
 /**
  * Merges Miva “related product” admin assignments (when present) with other products
  * from the **same Miva category(ies)** as the current PDP. Previously the fallback was
@@ -320,6 +350,29 @@ export async function getRelatedProducts(
   } catch {
     return [];
   }
+}
+
+/**
+ * When `CategoryProductList` / `getRelatedProducts` return no peers, scan the same
+ * `ProductList` cache the PDP uses. Category assignments are often present on the full
+ * catalog row even if list-by-category API returned nothing, so isPdpRelatedPair
+ * can still find shelf-mates. As a last resort, returns any purchasable SKUs (stable order).
+ */
+export async function getShelfMateCompanionsFromCatalog(
+  product: MivaProduct,
+  limit: number = 2
+): Promise<MivaProduct[]> {
+  const catalog = await getProductCatalog();
+  const self = product.code.toLowerCase();
+  const currentFull = catalog.find((p) => p.code.toLowerCase() === self) ?? product;
+  const pool = filterStorefrontProducts(catalog).filter((p) => p.code.toLowerCase() !== self);
+  const paired = pool
+    .filter((p) => isPdpRelatedPair(currentFull, p))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  if (paired.length > 0) {
+    return paired.slice(0, limit);
+  }
+  return pool.sort((a, b) => a.name.localeCompare(b.name)).slice(0, limit);
 }
 
 // ─── Categories ──────────────────────────────────────────────────────────────

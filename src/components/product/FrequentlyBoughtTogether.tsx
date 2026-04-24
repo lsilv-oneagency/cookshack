@@ -1,10 +1,9 @@
 "use client";
 
 import { Fragment, useMemo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
-import { mivaImgUrl } from "@/components/ProductImage";
+import ProductImage from "@/components/ProductImage";
 import { getPrimaryProductImagePath } from "@/lib/miva-product-images";
 import type { CartItem, MivaProduct } from "@/types/miva";
 
@@ -61,21 +60,22 @@ export default function FrequentlyBoughtTogether({ main, companions, group }: Pr
         product_sku: main.sku,
         product_price: priceNum(main),
         product_formatted_price: main.formatted_price,
-        product_image: main.image || "",
-        product_thumbnail: main.thumbnail || "",
+        product_image: getPrimaryProductImagePath(main) || main.image || "",
+        product_thumbnail: main.thumbnail || getPrimaryProductImagePath(main) || "",
         quantity: 1,
       },
     ];
     for (const c of companions) {
       if (!selected[c.code]) continue;
+      const img = getPrimaryProductImagePath(c) || c.image || "";
       payloads.push({
         product_code: c.code,
         product_name: c.name,
         product_sku: c.sku,
         product_price: priceNum(c),
         product_formatted_price: c.formatted_price,
-        product_image: c.image || "",
-        product_thumbnail: c.thumbnail || "",
+        product_image: img,
+        product_thumbnail: c.thumbnail || img,
         quantity: 1,
       });
     }
@@ -89,11 +89,6 @@ export default function FrequentlyBoughtTogether({ main, companions, group }: Pr
   };
 
   if (companions.length === 0) return null;
-
-  const imgSrc = (p: MivaProduct) => {
-    const path = getPrimaryProductImagePath(p);
-    return path ? mivaImgUrl(path) : "";
-  };
 
   return (
     <section className="border-t border-[#E8E0D8] pt-10" aria-labelledby="fbt-heading">
@@ -135,19 +130,15 @@ export default function FrequentlyBoughtTogether({ main, companions, group }: Pr
                   href={`/shop/${encodeURIComponent(p.code)}`}
                   className={`relative mx-auto block shrink-0 overflow-hidden rounded-lg border border-[#E8E0D8] bg-white ${THUMB}`}
                 >
-                  {imgSrc(p) ? (
-                    <Image
-                      src={imgSrc(p)}
-                      alt=""
-                      width={168}
-                      height={168}
-                      className="h-full w-full object-contain p-2"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-xs text-[#9A9A9A]">
-                      No image
-                    </div>
-                  )}
+                  <ProductImage
+                    src={getPrimaryProductImagePath(p) || undefined}
+                    alt={p.name}
+                    productCode={p.code}
+                    productName={p.name}
+                    fill
+                    sizes="168px"
+                    className="object-contain p-2"
+                  />
                 </Link>
 
                 <div className="mx-auto mt-3 min-h-[2.75rem] w-full max-w-[168px] px-0.5 text-center">

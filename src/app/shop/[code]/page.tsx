@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import type { MivaProduct } from "@/types/miva";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getCategoryProducts, getProductByCode, getRelatedProducts } from "@/lib/miva-client";
+import {
+  getCategoryProducts,
+  getProductByCode,
+  getRelatedProducts,
+  getShelfMateCompanionsFromCatalog,
+} from "@/lib/miva-client";
 import {
   getProductCustomFieldRows,
   isFeatureFieldRow,
@@ -16,6 +21,7 @@ import { getAllProductImagePaths, getPrimaryProductImagePath } from "@/lib/miva-
 import {
   filterStorefrontProducts,
   isNonPurchasableStorefrontProduct,
+  isPdpRelatedPair,
 } from "@/lib/miva-storefront-visibility";
 import AddToCartButton from "./AddToCartButton";
 import CatalogHeroBand from "@/components/CatalogHeroBand";
@@ -148,7 +154,7 @@ export default async function ProductPage({ params }: PageProps) {
   /** Same category on the PDP — used to group FBT with other members of that Miva category. */
   const firstActiveCategory = product.categories?.find((c) => c?.code && c.active);
 
-  let fbtCompanions: MivaProduct[] = [];
+  const fbtCompanions: MivaProduct[] = [];
   let fbtIncludedCategorySkus = false;
   const fbtSeen = new Set<string>([product.code.toLowerCase()]);
   const pushFbt = (p: MivaProduct, fromCategoryList: boolean) => {
@@ -202,23 +208,46 @@ export default async function ProductPage({ params }: PageProps) {
     }
   }
 
+  // 3) Full-catalog scan — same JSON as PDP; per-category API often returns 0 peers even when
+  //    other SKUs share category/cancat on the cached product list.
+  if (fbtCompanions.length === 0) {
+    for (const p of await getShelfMateCompanionsFromCatalog(product, 2)) {
+      if (fbtCompanions.length >= 2) break;
+      pushFbt(p, false);
+    }
+    if (fbtCompanions.length > 0) {
+      const anySameCollection = fbtCompanions.some((c) => isPdpRelatedPair(product, c));
+      if (anySameCollection) fbtIncludedCategorySkus = true;
+    }
+  }
+
   const fbtCodes = new Set(fbtCompanions.map((p) => p.code.toLowerCase()));
   const relatedForCarousels = related.filter((p) => !fbtCodes.has(p.code.toLowerCase()));
   const alsoViewed = relatedForCarousels.slice(0, 6);
   const moreToExplore = relatedForCarousels.slice(6, 14);
 
-  const fbtGroup =
-    fbtCompanions.length > 0 && fbtIncludedCategorySkus && firstActiveCategory
-      ? {
-          name: firstActiveCategory.name,
-          href: `/category/${encodeURIComponent(firstActiveCategory.code)}`,
-        }
-      : fbtCompanions.length > 0 && fbtIncludedCategorySkus && !firstActiveCategory && product.cancat_code
-        ? {
-            name: "This category",
-            href: `/category/${encodeURIComponent(product.cancat_code)}`,
-          }
-        : undefined;
+  let fbtGroup: { name: string; href: string } | undefined;
+  if (fbtCompanions.length > 0) {
+    if (fbtIncludedCategorySkus && firstActiveCategory) {
+      fbtGroup = {
+        name: firstActiveCategory.name,
+        href: `/category/${encodeURIComponent(firstActiveCategory.code)}`,
+      };
+    } else if (fbtIncludedCategorySkus && !firstActiveCategory && product.cancat_code) {
+      fbtGroup = {
+        name: "This category",
+        href: `/category/${encodeURIComponent(product.cancat_code)}`,
+      };
+    } else if (
+      fbtCompanions.some((c) => isPdpRelatedPair(product, c)) &&
+      firstActiveCategory
+    ) {
+      fbtGroup = {
+        name: firstActiveCategory.name,
+        href: `/category/${encodeURIComponent(firstActiveCategory.code)}`,
+      };
+    }
+  }
 
   return (
     <>
