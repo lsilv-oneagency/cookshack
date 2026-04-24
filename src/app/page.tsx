@@ -3,6 +3,7 @@ import Image from "next/image";
 import { getProducts, getCategoryProducts } from "@/lib/miva-client";
 import ProductCard from "@/components/ProductCard";
 import ProductImage from "@/components/ProductImage";
+import NothingBeatsCallout from "@/components/NothingBeatsCallout";
 import HeroBackground from "@/components/HeroBackground";
 import type { MivaProduct } from "@/types/miva";
 import {
@@ -39,29 +40,13 @@ function Hero() {
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 pb-16 pt-6 text-center sm:px-6 sm:pb-20 md:px-8 md:pb-28 md:pt-8">
         <div className="flex flex-col items-center">
-          <span className="inline-flex items-center justify-center gap-2 text-[#F48C06] text-xs font-heading font-bold tracking-[0.2em] uppercase mb-6">
-            <IconUserGroup className="w-4 h-4 shrink-0 text-[#F48C06]" aria-hidden />
-            Since 1962 — Family Owned
-          </span>
-          <h1 className="font-heading font-extrabold text-white leading-none text-shadow-lg mb-6">
-            <span className="block text-5xl sm:text-6xl lg:text-7xl tracking-wider">
-              NOTHING{" "}
-              <span className="text-[#E85D05]">BEATS A</span>
-            </span>
-            <span
-              className="block text-5xl font-extrabold leading-none tracking-wider text-white sm:text-6xl lg:text-7xl"
-              style={{
-                fontFamily: "var(--font-mesquite)",
-                fontOpticalSizing: "auto",
-                letterSpacing: "0.05em",
-              }}
-            >
-              COOKSHACK!
-            </span>
+          <h1 className="font-heading font-extrabold text-white leading-[1.05] text-shadow-lg mb-6">
+            <span className="block text-5xl sm:text-6xl lg:text-7xl tracking-wider">Legendary Smoke</span>
+            <span className="block text-5xl sm:text-6xl lg:text-7xl tracking-wider">Professional Grade</span>
           </h1>
           <p className="text-[#9A9A9A] text-base sm:text-lg leading-relaxed mb-8 max-w-2xl mx-auto font-body">
-            Consistent, high-volume performance with legendary smoke flavor — 
-            precision-built for backyard cooks and commercial kitchens who demand professional results.
+            Handcrafted smokers and grills built for high-volume restaurants and ultimate backyard
+            pitmasters.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full">
             <Link
@@ -509,6 +494,7 @@ export default async function HomePage() {
       <TrustBar />
       <CategoryCards />
       <FeaturedProduct />
+      <NothingBeatsCallout />
       <TopProducts />
       <Testimonials />
       <WhyCookshack />
