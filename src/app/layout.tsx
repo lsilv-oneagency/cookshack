@@ -54,8 +54,11 @@ async function RootLayoutInner({ children }: { children: React.ReactNode }) {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={`${outfit.variable} antialiased`}>
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${outfit.variable} antialiased`}
+        suppressHydrationWarning
+      >
         <RootLayoutInner>{children}</RootLayoutInner>
       </body>
     </html>
