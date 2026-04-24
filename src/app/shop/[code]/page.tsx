@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { MivaProduct } from "@/types/miva";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getCategoryProducts, getProductByCode, getRelatedProducts } from "@/lib/miva-client";
@@ -144,34 +145,60 @@ export default async function ProductPage({ params }: PageProps) {
     getProductDimensionRows(product)
   );
 
-  const related = await getRelatedProducts(product.code, 20, product);
-  let fbtCompanions = related.slice(0, 2);
+  /** Same category on the PDP — used to group FBT with other members of that Miva category. */
+  const firstActiveCategory = product.categories?.find((c) => c?.code && c.active);
 
-  // When related() is still short, pull shelf-mates from the same Miva category / default category so the FBT block can populate.
-  if (fbtCompanions.length < 2) {
-    const taken = new Set(
-      [product.code, ...fbtCompanions.map((p) => p.code)].map((c) => c.toLowerCase())
+  let fbtCompanions: MivaProduct[] = [];
+  let fbtIncludedCategorySkus = false;
+  const fbtSeen = new Set<string>([product.code.toLowerCase()]);
+  const pushFbt = (p: MivaProduct, fromCategoryList: boolean) => {
+    if (fbtCompanions.length >= 2) return;
+    const key = p.code.toLowerCase();
+    if (fbtSeen.has(key)) return;
+    fbtSeen.add(key);
+    fbtCompanions.push(p);
+    if (fromCategoryList) fbtIncludedCategorySkus = true;
+  };
+
+  // 1) Primary: other purchasable SKUs in the same category(ies) as this product (Miva grouping).
+  for (const c of product.categories ?? []) {
+    if (!c?.code || fbtCompanions.length >= 2) break;
+    try {
+      const res = await getCategoryProducts(c.code, { count: 48, sort: "disp_order" });
+      for (const p of filterStorefrontProducts(res.data || [])) {
+        if (fbtCompanions.length >= 2) break;
+        if (p.code.toLowerCase() === product.code.toLowerCase()) continue;
+        pushFbt(p, true);
+      }
+    } catch {
+      // ignore
+    }
+  }
+  if (fbtCompanions.length < 2 && product.cancat_code) {
+    const cancat = product.cancat_code;
+    const alreadyQueried = (product.categories ?? []).some(
+      (c) => c?.code && c.code.toLowerCase() === cancat.toLowerCase()
     );
-    const addFromCategory = async (categoryCode: string) => {
-      if (fbtCompanions.length >= 2) return;
+    if (!alreadyQueried) {
       try {
-        const res = await getCategoryProducts(categoryCode, { count: 32, sort: "disp_order" });
+        const res = await getCategoryProducts(cancat, { count: 48, sort: "disp_order" });
         for (const p of filterStorefrontProducts(res.data || [])) {
           if (fbtCompanions.length >= 2) break;
-          const key = p.code.toLowerCase();
-          if (taken.has(key)) continue;
-          taken.add(key);
-          fbtCompanions = [...fbtCompanions, p];
+          if (p.code.toLowerCase() === product.code.toLowerCase()) continue;
+          pushFbt(p, true);
         }
       } catch {
         // ignore
       }
-    };
-    for (const c of product.categories ?? []) {
-      if (c?.code) await addFromCategory(c.code);
     }
-    if (fbtCompanions.length < 2 && product.cancat_code) {
-      await addFromCategory(product.cancat_code);
+  }
+
+  // 2) Top up from related (admin + same-category engine) if the category list did not yield two companions.
+  const related = await getRelatedProducts(product.code, 20, product);
+  if (fbtCompanions.length < 2) {
+    for (const p of related) {
+      if (fbtCompanions.length >= 2) break;
+      pushFbt(p, false);
     }
   }
 
@@ -180,7 +207,18 @@ export default async function ProductPage({ params }: PageProps) {
   const alsoViewed = relatedForCarousels.slice(0, 6);
   const moreToExplore = relatedForCarousels.slice(6, 14);
 
-  const firstActiveCategory = product.categories?.find((c) => c?.code && c.active);
+  const fbtGroup =
+    fbtCompanions.length > 0 && fbtIncludedCategorySkus && firstActiveCategory
+      ? {
+          name: firstActiveCategory.name,
+          href: `/category/${encodeURIComponent(firstActiveCategory.code)}`,
+        }
+      : fbtCompanions.length > 0 && fbtIncludedCategorySkus && !firstActiveCategory && product.cancat_code
+        ? {
+            name: "This category",
+            href: `/category/${encodeURIComponent(product.cancat_code)}`,
+          }
+        : undefined;
 
   return (
     <>
@@ -295,7 +333,7 @@ export default async function ProductPage({ params }: PageProps) {
           {/* Full-width sections — reference-style PDP stack */}
           <div className="mt-12 space-y-12 sm:mt-16 sm:space-y-16">
             {fbtCompanions.length > 0 ? (
-              <FrequentlyBoughtTogether main={product} companions={fbtCompanions} />
+              <FrequentlyBoughtTogether main={product} companions={fbtCompanions} group={fbtGroup} />
             ) : (
               <section
                 className="border-t border-[#E8E0D8] pt-10"

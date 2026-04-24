@@ -22,9 +22,11 @@ function formatMoney(p: MivaProduct): string {
 type Props = {
   main: MivaProduct;
   companions: MivaProduct[];
+  /** When set, explains that companions are from the same Miva category / collection as this product. */
+  group?: { name: string; href: string };
 };
 
-export default function FrequentlyBoughtTogether({ main, companions }: Props) {
+export default function FrequentlyBoughtTogether({ main, companions, group }: Props) {
   const { addItem, isLoading } = useCart();
   const [selected, setSelected] = useState<Record<string, boolean>>(() => {
     const s: Record<string, boolean> = {};
@@ -101,9 +103,19 @@ export default function FrequentlyBoughtTogether({ main, companions }: Props) {
       >
         Frequently bought together
       </h2>
-      <p className="mt-2 text-sm text-[#6B6B6B]">
-        Select add-ons and add everything to your cart in one step.
-      </p>
+      {group ? (
+        <p className="mt-2 text-sm text-[#6B6B6B]">
+          Grouped with other items in{" "}
+          <Link href={group.href} className="font-heading font-bold text-[#D52324] hover:underline">
+            {group.name}
+          </Link>{" "}
+          — the same category as this product in the store.
+        </p>
+      ) : (
+        <p className="mt-2 text-sm text-[#6B6B6B]">
+          Select add-ons and add everything to your cart in one step.
+        </p>
+      )}
 
       <div className="mt-8 flex w-full flex-col gap-6 lg:flex-row lg:items-start lg:gap-4">
         {/* Three equal `flex-1` columns + 1rem gutters; + sits in 1rem track matching image height on sm+ */}
