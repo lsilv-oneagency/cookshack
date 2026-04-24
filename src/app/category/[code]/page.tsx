@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getAllCategoryProducts, getCategories, getCategoryByCode } from "@/lib/miva-client";
+import {
+  getAllActiveCategories,
+  getAllCategoryProducts,
+  getCategoryByCode,
+} from "@/lib/miva-client";
 import { getCategoryHeroTitle } from "@/lib/category-hero-title";
 import { filterStorefrontProducts } from "@/lib/miva-storefront-visibility";
+import type { MivaCategory } from "@/types/miva";
 import CatalogHeroBand from "@/components/CatalogHeroBand";
 import CategoryShopClient from "@/components/category/CategoryShopClient";
 
@@ -37,7 +42,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
 
   let category: Awaited<ReturnType<typeof getCategoryByCode>>["data"];
   let products: Awaited<ReturnType<typeof getAllCategoryProducts>> = [];
-  let allCategories: Awaited<ReturnType<typeof getCategories>>["data"] = [];
+  let allCategories: MivaCategory[] = [];
   let error = "";
   let categoryLoadError = "";
 
@@ -89,12 +94,12 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   const heroTitle = getCategoryHeroTitle(category);
 
   try {
-    const [rawProducts, catsRes] = await Promise.all([
+    const [rawProducts, cats] = await Promise.all([
       getAllCategoryProducts(decodedCode, "name"),
-      getCategories(),
+      getAllActiveCategories(),
     ]);
     products = filterStorefrontProducts(rawProducts);
-    allCategories = catsRes.data || [];
+    allCategories = cats;
   } catch (e) {
     error = e instanceof Error ? e.message : "Failed to load products";
   }

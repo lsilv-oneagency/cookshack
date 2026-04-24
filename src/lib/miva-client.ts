@@ -180,6 +180,15 @@ export async function getProductByCode(
   };
 }
 
+/**
+ * All active products from the cached catalog (same 999 cap as in-memory PDP lookups), filtered
+ * for the storefront. Used by `/shop` for client-side sort / filters; mirrors category pages.
+ */
+export async function getAllStorefrontProducts(): Promise<MivaProduct[]> {
+  const raw = await getProductCatalog();
+  return filterStorefrontProducts(raw);
+}
+
 export async function searchProducts(
   query: string,
   params: Omit<ProductListQueryParams, "search"> = {}
@@ -384,6 +393,60 @@ export async function getCategories(): Promise<MivaListResponse<MivaCategory>> {
     Filter: [{ name: "active", operator: "EQ", value: true }],
     ondemandcolumns: ["uris"],
   });
+}
+
+const CATEGORY_LIST_MAX = 999;
+
+/**
+ * All active categories (used for parent-chain walks / filters). One large slice + optional paging
+ * if the store has more than `CATEGORY_LIST_MAX` categories.
+ */
+export async function getAllActiveCategories(): Promise<MivaCategory[]> {
+  const byId = new Map<number, MivaCategory>();
+  const merge = (batch: MivaCategory[]) => {
+    for (const c of batch) {
+      if (c.id != null) {
+        byId.set(c.id, c);
+      }
+    }
+  };
+
+  const first = await mivaListRequest<MivaCategory>({
+    Function: "CategoryList_Load_Query",
+    Count: CATEGORY_LIST_MAX,
+    Offset: 0,
+    Filter: [{ name: "active", operator: "EQ", value: true }],
+    ondemandcolumns: ["uris"],
+  });
+  const firstData = first.data || [];
+  merge(firstData);
+  const total = first.total_count || 0;
+  if (firstData.length < CATEGORY_LIST_MAX) {
+    return [...byId.values()];
+  }
+  if (total > 0 && byId.size >= total) {
+    return [...byId.values()];
+  }
+
+  let offset = firstData.length;
+  for (let i = 0; i < 20; i++) {
+    const res = await mivaListRequest<MivaCategory>({
+      Function: "CategoryList_Load_Query",
+      Count: CATEGORY_LIST_MAX,
+      Offset: offset,
+      Filter: [{ name: "active", operator: "EQ", value: true }],
+      ondemandcolumns: ["uris"],
+    });
+    const batch = res.data || [];
+    const before = byId.size;
+    merge(batch);
+    if (batch.length === 0) break;
+    if (byId.size === before) break; // offset likely ignored
+    if (batch.length < CATEGORY_LIST_MAX) break;
+    if (total > 0 && byId.size >= total) break;
+    offset += batch.length;
+  }
+  return [...byId.values()];
 }
 
 /**

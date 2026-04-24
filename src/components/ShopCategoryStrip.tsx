@@ -52,16 +52,16 @@ export default function ShopCategoryStrip() {
   return (
     <section
       className="w-full border-t border-b border-[#2E2E2E] bg-[#0e0e0e] py-10 sm:py-12"
-      aria-labelledby="shop-our-products-heading"
+      aria-labelledby="shop-our-categories-heading"
     >
       {/* Full width of main content column — same as hero copy / featured / testimonials */}
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <header className="mb-10 text-center sm:mb-12">
           <h2
-            id="shop-our-products-heading"
+            id="shop-our-categories-heading"
             className="font-heading text-3xl font-extrabold uppercase tracking-wider text-white sm:text-4xl md:text-5xl"
           >
-            Shop Our Products
+            Shop Our Categories
           </h2>
           <div className="mx-auto mt-3 h-1 w-16 bg-[#D52324]" aria-hidden />
           <p className="mx-auto mt-5 max-w-2xl font-body text-base leading-relaxed text-[#9A9A9A] sm:text-lg">

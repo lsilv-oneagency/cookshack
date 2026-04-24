@@ -1,14 +1,83 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CookshackWordmark } from "@/components/CookshackLogo";
 
 const NOTHING_BEATS_BG = "/images/nothing-beats-bg.png";
 const BG_WIDTH = 1024;
 const BG_HEIGHT = 576;
 
+/** Full lockup in `public/images/` (flame + wordmark + “Made in Oklahoma”); use design export dimensions for stable layout. */
+const MADE_IN_OK_LOGO = "/images/cookshack-made-in-ok-logo.png";
+const MADE_IN_OK_W = 3425;
+const MADE_IN_OK_H = 1009;
+
 /** Parallax strength (px shift per “viewport center vs content” unit). Tuned to stay subtle. */
 const PARALLAX_STRENGTH = 0.12;
+
+type MadeInOkLockupProps = {
+  className: string;
+  width: number;
+  height: number;
+};
+
+/**
+ * Same box as a static <img>; recolors near-black wordmark to white, keeps red. Client-only;
+ * falls back to the original PNG if canvas write fails.
+ */
+function MadeInOkLockupWhiteWordmark({ className, width, height }: MadeInOkLockupProps) {
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const img = new window.Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const w = img.naturalWidth;
+      const h = img.naturalHeight;
+      if (!w || !h) return;
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      if (!ctx) return;
+      ctx.drawImage(img, 0, 0);
+      const { data } = ctx.getImageData(0, 0, w, h);
+      for (let i = 0; i < data.length; i += 4) {
+        const a = data[i + 3];
+        if (a < 8) continue;
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const isLikelyRed = r > 70 && r > g * 1.1 && r > b * 1.1;
+        if (isLikelyRed) continue;
+        const max = Math.max(r, g, b);
+        if (max < 80 && r + g + b < 200) {
+          data[i] = 255;
+          data[i + 1] = 255;
+          data[i + 2] = 255;
+        }
+      }
+      ctx.putImageData(new ImageData(data, w, h), 0, 0);
+      try {
+        setDataUrl(canvas.toDataURL("image/png"));
+      } catch {
+        // tainted or unsupported: keep unprocessed `src` below
+      }
+    };
+    img.src = MADE_IN_OK_LOGO;
+  }, []);
+
+  return (
+    <img
+      src={dataUrl ?? MADE_IN_OK_LOGO}
+      alt="Cookshack Made in Oklahoma — flame and wordmark"
+      width={width}
+      height={height}
+      className={className}
+      loading="lazy"
+      decoding="async"
+    />
+  );
+}
 
 /**
  * Full-bleed background (`object-cover`) + light scroll parallax. Respects `prefers-reduced-motion`.
@@ -81,20 +150,12 @@ export default function NothingBeatsCallout() {
       </div>
       <div className="relative z-0 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid items-center gap-8 md:grid-cols-2 md:gap-12">
-          <figure
-            className="mx-auto w-full max-w-lg drop-shadow-sm md:mx-0"
-            aria-label="Cookshack — Made in Oklahoma"
-          >
-            <div className="flex flex-col items-center gap-3 md:items-start">
-              {/*
-                Vector wordmark: white “COOKSHACK” letters + red flame (see CookshackLogo masks),
-                replaces raster logo with black type on this dark band.
-              */}
-              <CookshackWordmark className="w-full max-w-[min(100%,22rem)] sm:max-w-md" />
-              <p className="w-full text-center font-heading text-[10px] font-bold uppercase tracking-[0.28em] text-[#D52324] sm:text-[11px] md:text-left">
-                Made in Oklahoma
-              </p>
-            </div>
+          <figure className="mx-auto w-full max-w-lg drop-shadow-sm md:mx-0">
+            <MadeInOkLockupWhiteWordmark
+              width={MADE_IN_OK_W}
+              height={MADE_IN_OK_H}
+              className="h-auto w-full object-contain"
+            />
           </figure>
           <div className="text-center md:text-left">
             <h2

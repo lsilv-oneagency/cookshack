@@ -3,7 +3,7 @@ import Image from "next/image";
 import { getProducts, getCategoryProducts } from "@/lib/miva-client";
 import { getPrimaryProductImagePath } from "@/lib/miva-product-images";
 import { filterStorefrontProducts } from "@/lib/miva-storefront-visibility";
-import ProductCard from "@/components/ProductCard";
+import BrowseProductsWithFilters from "@/components/BrowseProductsWithFilters";
 import ProductImage from "@/components/ProductImage";
 import NothingBeatsCallout from "@/components/NothingBeatsCallout";
 import ShopCategoryStrip from "@/components/ShopCategoryStrip";
@@ -445,7 +445,7 @@ function WhyCookshack() {
   );
 }
 
-// ── Top Products ──────────────────────────────────────────────────────────
+// ── Browse products (home grid) ──────────────────────────────────────────
 const TOP_PRODUCTS_COUNT = 12;
 
 /** Featured in Miva may only list a few SKUs — keep filling from other sources until we hit the cap. */
@@ -500,7 +500,7 @@ async function loadTopProductsForHome(): Promise<MivaProduct[]> {
   return out;
 }
 
-async function TopProducts() {
+async function BrowseProducts() {
   let products: MivaProduct[] = [];
   try {
     products = await loadTopProductsForHome();
@@ -510,37 +510,7 @@ async function TopProducts() {
 
   if (products.length === 0) return null;
 
-  return (
-    <section className="bg-white py-16 sm:py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-end justify-between mb-10 gap-4 flex-wrap">
-          <div>
-            <h2 className="font-heading font-extrabold text-4xl sm:text-5xl text-[#1A1A1A] tracking-wider uppercase leading-none">
-              Top Products
-            </h2>
-            <div className="w-16 h-1 bg-[#D52324] mt-3" />
-            <p className="text-[#6B6B6B] text-sm mt-3 font-body">
-              Discover Cookshack&apos;s industry-leading smokers, wood-fired ovens, and premium fuels.
-            </p>
-          </div>
-          <Link
-            href="/shop"
-            className="flex items-center gap-2 text-[#D52324] font-heading font-bold text-sm tracking-widest uppercase hover:underline transition"
-          >
-            View All Products
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
-          {products.map((p) => (
-            <ProductCard key={p.id || p.code} product={p} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
+  return <BrowseProductsWithFilters allProducts={products} />;
 }
 
 // ── Trust bar ─────────────────────────────────────────────────────────────
@@ -562,7 +532,7 @@ function TrustBar({ variant = "standalone" }: { variant?: "standalone" | "inHero
     <div
       className={
         variant === "inHero"
-          ? "mt-auto w-full border-t border-[#2B2B2B] bg-[#111111]"
+          ? "mt-auto w-full border-t border-white/15 bg-black/25 shadow-[0_-1px_0_0_rgba(255,255,255,0.06)_inset] backdrop-blur-xl backdrop-saturate-150"
           : "border-t border-b border-[#2B2B2B] bg-[#111111]"
       }
     >
@@ -606,7 +576,7 @@ export default async function HomePage() {
       <CategoryCards />
       <FeaturedProduct />
       <NothingBeatsCallout />
-      <TopProducts />
+      <BrowseProducts />
       <ShopCategoryStrip />
       <Testimonials />
       <WhyCookshack />
