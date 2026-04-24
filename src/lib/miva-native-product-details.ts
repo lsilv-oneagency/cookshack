@@ -90,3 +90,22 @@ export function mergeDetailRows(customRows: CustomFieldRow[], nativeRows: Custom
   }
   return out;
 }
+
+/**
+ * Rows from `getNativeProductDetailRows` are **all** from Miva’s JSON, but some are
+ * merchandising/SEO/internal (product code, taxable, canonical URL, default category, etc.).
+ * The PDP “specifications / product information” table should not surface those to shoppers
+ * when they only crowd out real specs from `CustomField_Values` (e.g. brand, material, BTUs).
+ */
+const STOREFRONT_EXCLUDED_NATIVE_CODES = new Set([
+  "miva_code", // “Product code” — operational; SKU lives in the buy box
+  "taxable",
+  "cancat_code", // default category code
+  "uri_path",
+  "store_url",
+  "product_inventory", // on-hand count — not a product spec; stock is shown in buy box
+]);
+
+export function filterNativeRowsForStorefrontPdp(rows: CustomFieldRow[]): CustomFieldRow[] {
+  return rows.filter((r) => !STOREFRONT_EXCLUDED_NATIVE_CODES.has(r.code));
+}

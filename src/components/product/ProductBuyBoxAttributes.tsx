@@ -24,11 +24,11 @@ export default function ProductBuyBoxAttributes({
   if (rows.length === 0) return null;
 
   return (
-    <div className="overflow-hidden rounded-lg border border-[#E8E0D8] bg-[#FAFAFA]">
+    <div className="overflow-hidden rounded-md border border-neutral-200 bg-white shadow-sm">
       <table className="w-full text-left text-sm">
         <tbody>
           {rows.map((row) => (
-            <tr key={`${row.label}-${row.value}`} className="border-b border-[#E8E0D8] last:border-0">
+            <tr key={`${row.label}-${row.value}`} className="border-b border-neutral-200 last:border-0">
               <th
                 scope="row"
                 className="w-[38%] px-3 py-2 font-heading text-xs font-bold uppercase tracking-wide text-[#6B6B6B] sm:px-4"

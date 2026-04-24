@@ -16,7 +16,11 @@ import {
 } from "@/lib/miva-custom-fields";
 import { getProductDimensionRows } from "@/lib/miva-product-dimensions";
 import { getProductFeatureData } from "@/lib/miva-product-features";
-import { getNativeProductDetailRows, mergeDetailRows } from "@/lib/miva-native-product-details";
+import {
+  filterNativeRowsForStorefrontPdp,
+  getNativeProductDetailRows,
+  mergeDetailRows,
+} from "@/lib/miva-native-product-details";
 import { getAllProductImagePaths, getPrimaryProductImagePath } from "@/lib/miva-product-images";
 import {
   filterStorefrontProducts,
@@ -24,7 +28,8 @@ import {
   isPdpRelatedPair,
 } from "@/lib/miva-storefront-visibility";
 import AddToCartButton from "./AddToCartButton";
-import CatalogHeroBand from "@/components/CatalogHeroBand";
+import PdpBreadcrumb from "@/components/product/PdpBreadcrumb";
+import PdpProductRatingLine from "@/components/product/PdpProductRatingLine";
 import ProductDetailGallery from "@/components/product/ProductDetailGallery";
 import ProductCustomFieldsTable from "@/components/product/ProductCustomFieldsTable";
 import ProductBuyBoxAttributes from "@/components/product/ProductBuyBoxAttributes";
@@ -83,20 +88,8 @@ export default async function ProductPage({ params }: PageProps) {
   if (loadError) {
     return (
       <>
-        <CatalogHeroBand paddingClassName="py-3">
-          <nav className="flex items-center gap-2 text-xs text-[#6B6B6B]">
-            <Link href="/" className="hover:text-[#D52324] transition">
-              Home
-            </Link>
-            <span>/</span>
-            <Link href="/shop" className="hover:text-[#D52324] transition">
-              Shop
-            </Link>
-            <span>/</span>
-            <span className="text-[#9A9A9A]">Product</span>
-          </nav>
-        </CatalogHeroBand>
-        <div className="min-h-[50vh] bg-white">
+        <PdpBreadcrumb productName="Product" />
+        <div className="min-h-[50vh] bg-[#F3F3F3]">
           <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:px-8">
             <p className="mb-3 font-heading font-bold uppercase tracking-wide text-[#1A1A1A]">Unable to load product</p>
             <p className="mb-6 mx-auto max-w-md text-[#6B6B6B]">{loadError}</p>
@@ -144,7 +137,8 @@ export default async function ProductPage({ params }: PageProps) {
   const { lines: featureLines, descripForLongCopy } = getProductFeatureData(product, featureCustomRows);
   const longDescrip = descripForLongCopy ?? product.descrip;
 
-  const nativeDetailRows = getNativeProductDetailRows(product);
+  /* Native Miva fields include useful rows (categories, options, ship-box dims) and admin rows we hide on PDP. */
+  const nativeDetailRows = filterNativeRowsForStorefrontPdp(getNativeProductDetailRows(product));
   const mergedForBuyBox = mergeDetailRows(specWithoutFeatures, nativeDetailRows).slice(0, 4);
   const specTableRows = mergeDetailRows(
     mergeDetailRows(specWithoutFeatures, nativeDetailRows),
@@ -251,37 +245,21 @@ export default async function ProductPage({ params }: PageProps) {
 
   return (
     <>
-      <CatalogHeroBand paddingClassName="py-3">
-        <nav className="flex items-center gap-2 text-xs text-[#6B6B6B]" aria-label="Breadcrumb">
-          <Link href="/" className="hover:text-[#D52324] transition">
-            Home
-          </Link>
-          <span>/</span>
-          <Link href="/shop" className="hover:text-[#D52324] transition">
-            Shop
-          </Link>
-          <span>/</span>
-          <span className="max-w-xs truncate text-[#9A9A9A]">{product.name}</span>
-        </nav>
-      </CatalogHeroBand>
+      <PdpBreadcrumb productName={product.name} />
 
-      <div className="min-h-screen bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-          {/* Buy box — gallery + summary */}
-          <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-12 xl:gap-16">
+      <div className="min-h-screen bg-[#F3F3F3]">
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
+          <div className="rounded-md border border-neutral-200 bg-white p-4 shadow-sm sm:p-6 lg:grid lg:grid-cols-2 lg:gap-8 lg:p-8">
             <ProductDetailGallery
               images={images}
               productName={product.name}
               productCode={product.code}
+              productSku={product.sku}
             />
 
-            <div className="flex min-w-0 flex-col gap-5">
-              <h1 className="font-heading text-2xl font-extrabold uppercase leading-tight tracking-wide text-[#1A1A1A] sm:text-3xl lg:text-4xl">
-                {product.name}
-              </h1>
-
+            <div className="mt-6 flex min-w-0 flex-col gap-4 sm:mt-0 lg:gap-4">
               {product.categories && product.categories.length > 0 && (
-                <p className="text-xs text-[#6B6B6B]">
+                <p className="text-sm text-[#D52324]">
                   {product.categories
                     .filter((c) => c.active && c.code)
                     .slice(0, 4)
@@ -290,7 +268,7 @@ export default async function ProductPage({ params }: PageProps) {
                         {i > 0 && " · "}
                         <Link
                           href={`/category/${encodeURIComponent(c.code)}`}
-                          className="font-heading font-bold uppercase tracking-wide text-[#D52324] hover:underline"
+                          className="font-medium hover:underline"
                         >
                           {c.name}
                         </Link>
@@ -299,13 +277,21 @@ export default async function ProductPage({ params }: PageProps) {
                 </p>
               )}
 
-              <div className="flex flex-wrap items-center gap-4">
-                <span className="font-heading text-4xl font-extrabold text-[#1A1A1A]">
+              <h1 className="text-xl font-bold leading-snug text-[#0F1111] sm:text-2xl lg:text-[1.75rem] lg:leading-tight">
+                {product.name}
+              </h1>
+
+              <PdpProductRatingLine product={product} />
+
+              <div className="h-px w-full bg-neutral-200" aria-hidden />
+
+              <div className="flex flex-wrap items-baseline gap-3">
+                <span className="text-3xl font-bold tabular-nums text-[#0F1111] sm:text-4xl">
                   {product.formatted_price || `$${product.price?.toFixed(2)}`}
                 </span>
                 <span
-                  className={`inline-flex items-center gap-1.5 rounded px-3 py-1 font-heading text-xs font-bold uppercase tracking-wider ${
-                    inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-700"
+                  className={`inline-flex items-center gap-1.5 rounded px-2.5 py-0.5 text-sm font-bold ${
+                    inStock ? "bg-[#B7D6B7] text-[#0F5132]" : "bg-red-100 text-red-800"
                   }`}
                 >
                   {inStock && <IconCheckCircle className="h-4 w-4 shrink-0" aria-hidden />}
@@ -313,16 +299,26 @@ export default async function ProductPage({ params }: PageProps) {
                 </span>
               </div>
 
-              <p className="text-sm text-[#6B6B6B]">
-                Free shipping on many orders · Expert support{" "}
-                <a href="tel:18004230698" className="whitespace-nowrap font-semibold text-[#D52324] hover:underline">
-                  1-800-423-0698
-                </a>
+              <p className="text-sm text-[#565959]">
+                <span className="font-medium text-[#0F1111]">FREE shipping</span> on many qualifying orders to the lower
+                48.
               </p>
+              <p className="text-sm text-[#565959]">
+                Questions?{" "}
+                <a
+                  href="tel:18004230698"
+                  className="font-semibold text-[#D52324] hover:underline"
+                >
+                  1-800-423-0698
+                </a>{" "}
+                · Expert support
+              </p>
+
+              <div className="h-px w-full bg-neutral-200" aria-hidden />
 
               <ProductKeyFeatures lines={featureLines} />
 
-              <div className="pt-1">
+              <div>
                 <ProductBuyBoxAttributes
                   sku={product.sku}
                   weightLbs={product.weight > 0 ? product.weight : undefined}
@@ -330,7 +326,7 @@ export default async function ProductPage({ params }: PageProps) {
                 />
               </div>
 
-              <div className="border-t border-b border-[#E8E0D8] py-5">
+              <div className="pt-1">
                 <AddToCartButton product={product} inStock={inStock} />
               </div>
 
@@ -344,37 +340,37 @@ export default async function ProductPage({ params }: PageProps) {
                 ).map(({ Icon, label, sub }) => (
                   <div
                     key={label}
-                    className="rounded border border-[#E8E0D8] bg-white p-2.5 text-center sm:p-3"
+                    className="rounded border border-neutral-200 bg-[#F7F8F8] p-2 text-center sm:p-2.5"
                   >
-                    <div className="mb-1 flex justify-center text-[#D52324]">
-                      <Icon className="h-6 w-6" aria-hidden />
+                    <div className="mb-0.5 flex justify-center text-[#D52324]">
+                      <Icon className="h-5 w-5" aria-hidden />
                     </div>
-                    <p className="font-heading text-[9px] font-bold uppercase tracking-wider text-[#1A1A1A] sm:text-[10px]">
+                    <p className="text-[8px] font-bold uppercase leading-tight tracking-wider text-[#0F1111] sm:text-[9px]">
                       {label}
                     </p>
-                    <p className="mt-0.5 text-[8px] text-[#9A9A9A] sm:text-[9px]">{sub}</p>
+                    <p className="mt-0.5 text-[7px] text-[#565959] sm:text-[8px]">{sub}</p>
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Full-width sections — reference-style PDP stack */}
-          <div className="mt-12 space-y-12 sm:mt-16 sm:space-y-16">
+          <div className="mt-4 space-y-4 sm:mt-5 sm:space-y-5">
             {fbtCompanions.length > 0 ? (
               <FrequentlyBoughtTogether main={product} companions={fbtCompanions} group={fbtGroup} />
             ) : (
               <section
-                className="border-t border-[#E8E0D8] pt-10"
+                className="rounded-md border border-neutral-200 bg-white p-4 shadow-sm sm:p-6"
                 aria-labelledby="fbt-heading-empty"
               >
                 <h2
                   id="fbt-heading-empty"
-                  className="font-heading text-xl font-extrabold uppercase tracking-wider text-[#1A1A1A] sm:text-2xl"
+                  className="text-lg font-bold text-[#0F1111] sm:text-xl"
                 >
                   Frequently bought together
                 </h2>
-                <p className="mt-2 max-w-2xl text-sm text-[#6B6B6B]">
+                <div className="mt-2 h-0.5 w-12 bg-[#D52324]" aria-hidden />
+                <p className="mt-3 max-w-2xl text-sm text-[#565959]">
                   We could not find other products in the same category to bundle with this item yet. Browse the shop or
                   your category to add compatible accessories and add-ons.
                 </p>
@@ -412,18 +408,20 @@ export default async function ProductPage({ params }: PageProps) {
             {boxText && <WhatsInTheBoxSection text={boxText} />}
 
             {longDescrip && longDescrip.trim().length > 0 && (
-              <section className="border-t border-[#E8E0D8] pt-10" aria-label="Product description">
-                <h2 className="font-heading text-xl font-extrabold uppercase tracking-wider text-[#1A1A1A] sm:text-2xl">
-                  Product details
-                </h2>
+              <section
+                className="rounded-md border border-neutral-200 bg-white p-4 shadow-sm sm:p-6"
+                aria-label="Product description"
+              >
+                <h2 className="text-lg font-bold text-[#0F1111] sm:text-xl">Product details</h2>
+                <div className="mt-2 h-0.5 w-12 bg-[#D52324]" aria-hidden />
                 <div
-                  className="prose prose-sm mt-6 max-w-none text-[#3D3D3D] sm:prose-base prose-headings:font-heading prose-headings:uppercase prose-headings:tracking-wide prose-a:text-[#D52324] prose-a:no-underline hover:prose-a:underline"
+                  className="prose prose-sm mt-5 max-w-none text-[#0F1111] sm:prose-base prose-headings:font-bold prose-a:text-[#D52324] prose-a:no-underline hover:prose-a:underline"
                   dangerouslySetInnerHTML={{ __html: longDescrip }}
                 />
               </section>
             )}
 
-            <ProductReviewsPlaceholder />
+            <ProductReviewsPlaceholder product={product} />
 
             {moreToExplore.length > 0 && (
               <ProductCarouselSection

@@ -320,10 +320,10 @@ export default function Header() {
 
           {megaLabel && activeMegaItem?.categoryCode && (
             <div
-              className="glass-header-layer absolute left-0 right-0 top-full z-50 -mt-px border-t border-white/[0.14] border-b border-white/[0.16] pt-px shadow-[0_20px_40px_rgba(0,0,0,0.35)]"
+              className="mega-menu-panel absolute left-0 right-0 top-full z-50 border-t border-neutral-200 border-b border-neutral-200"
               onMouseEnter={cancelCloseMega}
             >
-              <div className="mx-auto max-w-7xl px-3 py-3 sm:px-4 lg:px-6">
+              <div className="mx-auto max-w-7xl px-3 pt-3 pb-5 sm:px-4 sm:pt-3 sm:pb-6 lg:px-6">
                 <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                   <p className="text-[10px] font-heading font-bold uppercase tracking-widest text-[#9A9A9A] sm:text-xs">
                     {activeMegaItem.label}
@@ -341,21 +341,21 @@ export default function Header() {
                     {Array.from({ length: MEGA_PRODUCT_COUNT }).map((_, i) => (
                       <div
                         key={i}
-                        className="animate-pulse rounded-lg border border-white/10 bg-white/10 p-1 shadow-inner shadow-black/20 backdrop-blur-md"
+                        className="animate-pulse rounded-lg border border-neutral-200 bg-neutral-50 p-1 shadow-sm"
                       >
-                        <div className="h-16 rounded-md bg-white/10 sm:h-20 md:h-24" />
-                        <div className="mx-auto mt-1 h-2 max-w-[85%] rounded bg-white/10" />
-                        <div className="mx-auto mt-1 h-2 max-w-[55%] rounded bg-white/10" />
+                        <div className="h-[4.5rem] rounded-md bg-neutral-200/80 sm:h-[5.5rem] md:h-28" />
+                        <div className="mx-auto mt-1 h-2 max-w-[85%] rounded bg-neutral-200" />
+                        <div className="mx-auto mt-1 h-2 max-w-[55%] rounded bg-neutral-200" />
                       </div>
                     ))}
                   </div>
                 ) : megaError ? (
-                  <div className="rounded-lg border border-white/15 bg-black/30 px-4 py-4 text-center backdrop-blur-md">
-                    <p className="text-xs text-[#E8E8E8] sm:text-sm">{megaError}</p>
-                    <p className="mt-2 text-[10px] text-[#9A9A9A] sm:text-xs">
+                  <div className="rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-4 text-center">
+                    <p className="text-xs text-neutral-800 sm:text-sm">{megaError}</p>
+                    <p className="mt-2 text-[10px] text-neutral-600 sm:text-xs">
                       On the live site this is usually a Vercel env issue — copy every{" "}
-                      <code className="rounded bg-white/10 px-1">MIVA_*</code> value from{" "}
-                      <code className="rounded bg-white/10 px-1">.env.local</code> into Vercel (Production
+                      <code className="rounded bg-neutral-200 px-1 text-neutral-900">MIVA_*</code> value from{" "}
+                      <code className="rounded bg-neutral-200 px-1 text-neutral-900">.env.local</code> into Vercel (Production
                       and Preview).
                     </p>
                     <Link
@@ -378,9 +378,9 @@ export default function Header() {
                       <Link
                         key={p.code}
                         href={`/shop/${encodeURIComponent(p.code)}`}
-                        className="group flex min-w-0 flex-col overflow-hidden rounded-lg border border-white/15 bg-white/95 shadow-sm backdrop-blur-md transition hover:border-[#D52324] hover:bg-white hover:shadow-md"
+                        className="group flex min-w-0 flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm transition hover:border-[#D52324] hover:shadow-md"
                       >
-                        <div className="relative h-16 w-full bg-white sm:h-20 md:h-24">
+                        <div className="relative h-[4.5rem] w-full bg-white sm:h-[5.5rem] md:h-28">
                           <ProductImage
                             src={getPrimaryProductImagePath(p) || undefined}
                             alt={p.name}
@@ -391,7 +391,7 @@ export default function Header() {
                             className="object-contain p-0.5 transition group-hover:scale-105 sm:p-1"
                           />
                         </div>
-                        <div className="flex min-h-0 flex-1 flex-col gap-0.5 px-1 pb-1.5 pt-1">
+                        <div className="flex min-h-0 flex-1 flex-col gap-0.5 px-1 pb-2 pt-1">
                           <span className="line-clamp-2 text-[8px] font-heading font-semibold uppercase leading-tight tracking-wide text-neutral-900 transition group-hover:text-[#D52324] sm:text-[9px] md:line-clamp-2 md:text-[10px]">
                             {p.name}
                           </span>

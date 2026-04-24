@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 
 // ── Product type detector for last-resort placeholder ────────────────────────
@@ -50,6 +50,7 @@ export function mivaImgUrl(pathOrUrl: string): string {
 
 // Miva product graphics are often mm5/graphics/00000001/1/{code}.png or .jpg
 function codeBasedImgQuery(code: string, ext: "png" | "jpg") {
+  if (!code.trim()) return null;
   return `/api/img?p=${encodeURIComponent(`mm5/graphics/00000001/1/${code}.${ext}`)}`;
 }
 
@@ -58,6 +59,7 @@ interface Props {
   alt: string;
   productCode: string;
   productName: string;
+  productSku?: string;
   fill?: boolean;
   sizes?: string;
   className?: string;
@@ -69,37 +71,44 @@ export default function ProductImage({
   alt,
   productCode,
   productName,
+  productSku,
   fill = true,
   sizes,
   className = "",
   priority = false,
 }: Props) {
-  // Stage 0: API-provided image URL (proxied)
-  // Stage 1–2: Fallback — {code}.png then {code}.jpg
-  // Stage 3: Branded placeholder
   const [stage, setStage] = useState(0);
 
-  const stage0Url = src ? mivaImgUrl(src) : null;
-  const stage1Url = codeBasedImgQuery(productCode, "png");
-  const stage2Url = codeBasedImgQuery(productCode, "jpg");
+  const imageUrls = useMemo(() => {
+    const out: string[] = [];
+    const add = (u: string | null | undefined) => {
+      if (u) out.push(u);
+    };
+    if (src?.trim()) add(mivaImgUrl(src));
+    add(codeBasedImgQuery(productCode, "png"));
+    add(codeBasedImgQuery(productCode, "jpg"));
+    if (productSku?.trim()) {
+      const s = productSku.trim();
+      if (s.toUpperCase() !== productCode.trim().toUpperCase()) {
+        add(codeBasedImgQuery(s, "png"));
+        add(codeBasedImgQuery(s, "jpg"));
+      }
+    }
+    return out;
+  }, [src, productCode, productSku]);
 
-  // If API gave us nothing, skip straight to code-based fallback
-  const effectiveStage = stage === 0 && !stage0Url ? 1 : stage;
-  const effectiveUrl =
-    effectiveStage === 0
-      ? stage0Url
-      : effectiveStage === 1
-        ? stage1Url
-        : effectiveStage === 2
-          ? stage2Url
-          : null;
+  useEffect(() => {
+    setStage(0);
+  }, [src, productCode, productSku]);
+
+  const effectiveUrl = stage < imageUrls.length ? imageUrls[stage] : null;
+  const showPlaceholder = imageUrls.length === 0 || stage >= imageUrls.length;
 
   const advance = () => setStage((s) => s + 1);
 
   const type = getProductType(productCode, productName);
 
-  // Placeholder (stage 3+)
-  if (effectiveStage >= 3 || !effectiveUrl) {
+  if (showPlaceholder || !effectiveUrl) {
     return (
       <div
         className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 px-2"

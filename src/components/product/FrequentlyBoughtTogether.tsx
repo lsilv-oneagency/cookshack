@@ -91,15 +91,19 @@ export default function FrequentlyBoughtTogether({ main, companions, group }: Pr
   if (companions.length === 0) return null;
 
   return (
-    <section className="border-t border-[#E8E0D8] pt-10" aria-labelledby="fbt-heading">
+    <section
+      className="rounded-md border border-neutral-200 bg-white p-4 shadow-sm sm:p-6"
+      aria-labelledby="fbt-heading"
+    >
       <h2
         id="fbt-heading"
-        className="font-heading text-xl font-extrabold uppercase tracking-wider text-[#1A1A1A] sm:text-2xl"
+        className="text-lg font-bold text-[#0F1111] sm:text-xl"
       >
         Frequently bought together
       </h2>
+      <div className="mt-2 h-0.5 w-12 bg-[#D52324]" aria-hidden />
       {group ? (
-        <p className="mt-2 text-sm text-[#6B6B6B]">
+        <p className="mt-3 text-sm text-[#565959]">
           Grouped with other items in{" "}
           <Link href={group.href} className="font-heading font-bold text-[#D52324] hover:underline">
             {group.name}
@@ -107,7 +111,7 @@ export default function FrequentlyBoughtTogether({ main, companions, group }: Pr
           — the same category as this product in the store.
         </p>
       ) : (
-        <p className="mt-2 text-sm text-[#6B6B6B]">
+        <p className="mt-3 text-sm text-[#565959]">
           Select add-ons and add everything to your cart in one step.
         </p>
       )}
@@ -134,6 +138,7 @@ export default function FrequentlyBoughtTogether({ main, companions, group }: Pr
                     src={getPrimaryProductImagePath(p) || undefined}
                     alt={p.name}
                     productCode={p.code}
+                    productSku={p.sku}
                     productName={p.name}
                     fill
                     sizes="168px"

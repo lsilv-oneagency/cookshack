@@ -135,20 +135,19 @@ function stripHtml(html: string): string {
 /** When Miva returns no featured / pizza product (e.g. local dev). */
 function FeaturedProductFallback() {
   return (
-    <section className="bg-[#1A1A1A] overflow-hidden relative">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(213,35,36,0.12)_0%,transparent_60%)]" />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 relative z-10">
+    <section className="relative overflow-hidden bg-white">
+      <div className="relative z-0 mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
         <div className="grid md:grid-cols-2 gap-10 items-center">
           <div>
             <span className="inline-flex items-center gap-2 text-[#D52324] text-[10px] font-heading font-bold tracking-[0.25em] uppercase mb-4">
               <IconPizza className="w-4 h-4 shrink-0 text-[#D52324]" aria-hidden />
               Wood fire — pizza ovens
             </span>
-            <h2 className="font-heading font-extrabold text-white text-4xl sm:text-5xl tracking-wider uppercase leading-none mb-4">
+            <h2 className="font-heading font-extrabold text-[#1A1A1A] text-4xl sm:text-5xl tracking-wider uppercase leading-none mb-4">
               Wood Fire<br />
               <span className="text-[#D52324]">Pizza Oven</span>
             </h2>
-            <p className="text-[#9A9A9A] text-base leading-relaxed mb-6 max-w-md">
+            <p className="text-[#565959] text-base leading-relaxed mb-6 max-w-md">
               Bring artisan-quality, wood-fired pizza to your commercial kitchen or backyard.
               Authentic char. Incredible crust. Only from Cookshack.
             </p>
@@ -162,7 +161,7 @@ function FeaturedProductFallback() {
               </svg>
             </Link>
           </div>
-          <div className="hidden md:block relative h-72 w-full rounded-xl overflow-hidden border border-[#2B2B2B]">
+          <div className="relative hidden h-72 w-full overflow-hidden rounded-xl border border-[#E8E0D8] bg-white md:block">
             <Image
               src={IMG("Pizza_Oven_Promo_3.jpg")}
               alt="Cookshack wood fire pizza oven"
@@ -170,7 +169,6 @@ function FeaturedProductFallback() {
               className="object-cover rounded-xl"
               unoptimized
             />
-            <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#1A1A1A]/40 rounded-xl pointer-events-none" />
           </div>
         </div>
       </div>
@@ -214,9 +212,8 @@ async function FeaturedProduct() {
   const imgPath = getPrimaryProductImagePath(product);
 
   return (
-    <section className="bg-[#1A1A1A] overflow-hidden relative">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(213,35,36,0.12)_0%,transparent_60%)]" />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 relative z-10">
+    <section className="relative overflow-hidden bg-white">
+      <div className="relative z-0 mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
         <div className="grid md:grid-cols-2 gap-10 items-center">
           <div>
             <span className="inline-flex items-center gap-2 text-[#D52324] text-[10px] font-heading font-bold tracking-[0.25em] uppercase mb-4">
@@ -227,7 +224,7 @@ async function FeaturedProduct() {
               )}
               {isPizzaSpotlight ? "Wood fire — featured" : "Featured product"}
             </span>
-            <h2 className="font-heading font-extrabold text-white text-3xl sm:text-4xl lg:text-5xl tracking-wider uppercase leading-tight mb-3">
+            <h2 className="font-heading font-extrabold text-[#1A1A1A] text-3xl sm:text-4xl lg:text-5xl tracking-wider uppercase leading-tight mb-3">
               {product.name}
             </h2>
             {product.formatted_price && (
@@ -235,7 +232,7 @@ async function FeaturedProduct() {
                 {product.formatted_price}
               </p>
             )}
-            <p className="text-[#9A9A9A] text-base leading-relaxed mb-6 max-w-md">
+            <p className="text-[#565959] text-base leading-relaxed mb-6 max-w-md">
               {excerpt ||
                 "Industry-leading Cookshack equipment — engineered for performance, reliability, and legendary smoke flavor."}
             </p>
@@ -252,14 +249,14 @@ async function FeaturedProduct() {
               {isPizzaSpotlight && (
                 <Link
                   href="/category/sub_ctgy_pizza_oven"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-[#3D3D3D] text-white font-heading font-bold tracking-widest uppercase text-sm hover:border-[#D52324] hover:text-[#D52324] transition rounded"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-[#3D3D3D] text-[#1A1A1A] font-heading font-bold tracking-widest uppercase text-sm hover:border-[#D52324] hover:text-[#D52324] transition rounded"
                 >
                   All pizza ovens
                 </Link>
               )}
             </div>
           </div>
-          <div className="relative h-72 md:h-96 w-full rounded-xl overflow-hidden bg-[#111111] border border-[#2B2B2B]">
+          <div className="relative h-72 w-full overflow-hidden rounded-xl border border-[#E8E0D8] bg-white md:h-96">
             <ProductImage
               src={imgPath}
               alt={product.name}
@@ -270,7 +267,6 @@ async function FeaturedProduct() {
               sizes="(max-width: 768px) 100vw, 50vw"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#1A1A1A]/35 pointer-events-none rounded-xl" />
           </div>
         </div>
       </div>

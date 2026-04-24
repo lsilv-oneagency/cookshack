@@ -4,7 +4,7 @@ import { IconPhone } from "@/components/icons";
 export default function ProductExpertBand() {
   return (
     <section
-      className="rounded-xl border border-[#E8E0D8] bg-gradient-to-r from-[#F7F7F7] to-white p-6 sm:p-8"
+      className="rounded-md border border-neutral-200 bg-gradient-to-r from-white to-[#F7F7F7] p-5 shadow-sm sm:p-6"
       aria-label="Expert help"
     >
       <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-8">

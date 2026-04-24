@@ -6,20 +6,18 @@ type Props = {
 /**
  * “Key features” / marketing bullets from Miva custom fields, attributes, or the first list in `descrip`.
  */
-export default function ProductKeyFeatures({ lines, title = "Key features" }: Props) {
+export default function ProductKeyFeatures({ lines, title = "About this item" }: Props) {
   if (lines.length === 0) return null;
 
   return (
     <section
-      className="rounded-lg border border-[#E8E0D8] bg-[#FAFAFA] p-4 sm:p-5"
+      className="rounded-md border border-neutral-200 bg-white p-4 shadow-sm sm:p-5"
       aria-label={title}
     >
-      <h2 className="font-heading text-sm font-extrabold uppercase tracking-wider text-[#1A1A1A]">
-        {title}
-      </h2>
-      <ul className="mt-3 space-y-2.5" role="list">
+      <h2 className="text-base font-bold text-[#0F1111]">{title}</h2>
+      <ul className="mt-3 list-none space-y-2.5" role="list">
         {lines.map((line) => (
-          <li key={line} className="flex gap-2.5 text-sm leading-snug text-[#3D3D3D]">
+          <li key={line} className="flex gap-2.5 text-sm leading-relaxed text-[#0F1111]">
             <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#D52324]" aria-hidden />
             <span className="min-w-0 flex-1">{line}</span>
           </li>

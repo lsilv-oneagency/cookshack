@@ -39,39 +39,41 @@ export default function AddToCartButton({ product, inStock }: Props) {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Quantity */}
-      <div className="flex items-center gap-4">
-        <span className="text-sm font-heading font-bold text-[#1A1A1A] tracking-wide uppercase">
-          Qty
-        </span>
-        <div className="flex items-center border border-[#D4C8BE] rounded overflow-hidden bg-white">
+    <div className="space-y-4 rounded-md border border-neutral-200 bg-[#FEFEFE] p-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="text-sm font-bold text-[#0F1111]">Quantity</span>
+        <div className="flex h-8 items-center overflow-hidden rounded-md border border-neutral-300 bg-white shadow-sm">
           <button
+            type="button"
             onClick={() => setQuantity(Math.max(1, quantity - 1))}
-            className="w-10 h-10 flex items-center justify-center text-[#6B6B6B] hover:text-[#1A1A1A] hover:bg-[#F0EBE3] transition font-bold text-xl"
+            className="flex h-full w-8 items-center justify-center text-[#0F1111] transition hover:bg-neutral-100"
+            aria-label="Decrease quantity"
           >
             −
           </button>
-          <span className="w-12 text-center font-bold text-[#1A1A1A] text-base">{quantity}</span>
+          <span className="min-w-9 px-1 text-center text-sm font-bold tabular-nums text-[#0F1111]">
+            {quantity}
+          </span>
           <button
+            type="button"
             onClick={() => setQuantity(quantity + 1)}
-            className="w-10 h-10 flex items-center justify-center text-[#6B6B6B] hover:text-[#1A1A1A] hover:bg-[#F0EBE3] transition font-bold text-xl"
+            className="flex h-full w-8 items-center justify-center text-[#0F1111] transition hover:bg-neutral-100"
+            aria-label="Increase quantity"
           >
             +
           </button>
         </div>
       </div>
 
-      {/* Add to cart button */}
       <button
         onClick={handleAdd}
         disabled={adding || isLoading || !inStock}
-        className={`w-full py-4 font-heading font-bold text-base tracking-widest uppercase transition-all active:scale-[0.98] flex items-center justify-center gap-2 rounded ${
+        className={`flex w-full items-center justify-center gap-2 rounded-full py-3 text-base font-bold shadow-sm transition active:scale-[0.99] ${
           added
             ? "bg-green-700 text-white"
             : inStock
-            ? "bg-[#D52324] text-white hover:brightness-[0.94]"
-            : "bg-[#D4C8BE] text-[#9A9A9A] cursor-not-allowed"
+              ? "bg-[#D52324] text-white hover:brightness-[0.95]"
+              : "cursor-not-allowed bg-neutral-200 text-[#6B6B6B]"
         }`}
       >
         {adding ? (

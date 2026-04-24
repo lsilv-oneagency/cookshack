@@ -14,20 +14,20 @@ export default function ProductCarouselSection({ title, subtitle, products, sect
 
   return (
     <section
-      className="border-t border-[#E8E0D8] pt-10"
+      className="rounded-md border border-neutral-200 bg-white p-4 shadow-sm sm:p-6"
       aria-labelledby={sectionId ? `${sectionId}-heading` : undefined}
     >
-      <div className="mb-6">
+      <div className="mb-4">
         <h2
           id={sectionId ? `${sectionId}-heading` : undefined}
-          className="font-heading text-xl font-extrabold uppercase tracking-wider text-[#1A1A1A] sm:text-2xl"
+          className="text-lg font-bold text-[#0F1111] sm:text-xl"
         >
           {title}
         </h2>
-        {subtitle && <p className="mt-1 text-sm text-[#6B6B6B]">{subtitle}</p>}
-        <div className="mt-2 h-1 w-12 bg-[#D52324]" />
+        {subtitle && <p className="mt-1 text-sm text-[#565959]">{subtitle}</p>}
+        <div className="mt-2 h-0.5 w-12 bg-[#D52324]" />
       </div>
-      <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
+      <div className="-mx-2 flex snap-x snap-mandatory gap-3 overflow-x-auto px-2 pb-1 sm:-mx-0 sm:px-0">
         {products.map((p) => (
           <div
             key={p.code}
