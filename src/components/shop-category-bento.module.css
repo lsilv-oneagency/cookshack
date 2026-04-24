@@ -1,0 +1,308 @@
+/* Mathematically symmetric bento — 2·3·2 diagonal mirror. Layout matches bento-box.html. */
+
+.bento {
+  --gap: 10px;
+  --bg-scrim: #0e0e0e;
+  --card: #161616;
+  /* Brand red — solid edges / rules, not diffuse outer glows */
+  --accent: #d52324;
+  --accent-deep: #ae2012;
+  --text: #f5f5f5;
+  --text-muted: #9a9a9a;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: 200px 200px 200px;
+  gap: var(--gap);
+  width: 100%;
+}
+
+/* Grid items are <li> (link is inside) — same cell spans as the reference. */
+/* Row 1: 7 + 5 */
+.bento > li:nth-child(1) {
+  grid-column: 1 / span 7;
+}
+.bento > li:nth-child(2) {
+  grid-column: 8 / span 5;
+}
+
+/* Row 2: 4 + 4 + 4 */
+.bento > li:nth-child(3) {
+  grid-column: 1 / span 4;
+}
+.bento > li:nth-child(4) {
+  grid-column: 5 / span 4;
+}
+.bento > li:nth-child(5) {
+  grid-column: 9 / span 4;
+}
+
+/* Row 3: 5 + 7 (mirror of row 1) */
+.bento > li:nth-child(6) {
+  grid-column: 1 / span 5;
+}
+.bento > li:nth-child(7) {
+  grid-column: 6 / span 7;
+}
+
+/* --- card link fills grid cell --- */
+.bento > li {
+  min-width: 0;
+  list-style: none;
+}
+
+.bento .card {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  background: var(--card);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 22px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.4s ease;
+  outline: none;
+  opacity: 0;
+  transform: translateY(18px);
+  animation: cardIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Keyboard: same card lift + double ring (after brand edge shadow) */
+.bento .card:focus-visible {
+  border-color: rgba(213, 35, 36, 0.5);
+  box-shadow: 0 0 0 1px rgba(213, 35, 36, 0.35), inset 0 1px 0 0 rgba(255, 255, 255, 0.07),
+    0 18px 44px -14px rgba(0, 0, 0, 0.65), 0 0 0 2px rgba(255, 255, 255, 0.3), 0 0 0 4px rgba(213, 35, 36, 0.45);
+  transform: translateY(-4px);
+}
+
+/* Photo at full strength — legibility comes from the scrim, not dimming the whole image */
+.cardBg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 1;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: scale(1.06);
+  pointer-events: none;
+}
+
+/* Bottom-weighted scrim: keep upper card atmospheric; darken only where the type sits */
+.cardScrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.06) 0%,
+    rgba(0, 0, 0, 0.1) 28%,
+    rgba(0, 0, 0, 0.38) 55%,
+    rgba(0, 0, 0, 0.82) 100%
+  );
+  transition: background 0.4s ease;
+  pointer-events: none;
+}
+
+/* Bottom bar — H2 / rule treatment (not a soft “neon” glow) */
+.cardGlowLine {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent-deep) 0%, var(--accent) 28%, var(--accent) 100%);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 3;
+}
+
+/* Pointer hover — no diffuse red haze; charcoal depth + hairline (Cookshack UI language) */
+.bento .card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(213, 35, 36, 0.5);
+  box-shadow: 0 0 0 1px rgba(213, 35, 36, 0.35), inset 0 1px 0 0 rgba(255, 255, 255, 0.07),
+    0 18px 44px -14px rgba(0, 0, 0, 0.65);
+}
+
+.bento .card:hover .cardBg,
+.bento .card:focus-visible .cardBg {
+  transform: scale(1.03);
+}
+
+.bento .card:hover .cardScrim,
+.bento .card:focus-visible .cardScrim {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.08) 25%,
+    rgba(0, 0, 0, 0.32) 50%,
+    rgba(0, 0, 0, 0.72) 100%
+  );
+}
+
+.bento .card:hover .cardGlowLine,
+.bento .card:focus-visible .cardGlowLine {
+  transform: scaleX(1);
+}
+
+.bento .card:hover .count,
+.bento .card:focus-visible .count {
+  color: var(--accent);
+}
+
+.bento .card:hover .title,
+.bento .card:focus-visible .title {
+  color: #fff;
+}
+
+.bento .card:hover .arrow,
+.bento .card:focus-visible .arrow {
+  opacity: 1;
+  transform: translateX(0);
+  color: var(--accent);
+}
+
+.bento .card:hover .icon,
+.bento .card:focus-visible .icon {
+  opacity: 0.55;
+}
+
+/* content */
+.cardContent {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.labelCol {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.count {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  transition: color 0.35s ease;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+}
+
+.title {
+  line-height: 1;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text);
+  transition: color 0.3s ease;
+  font-size: 22px;
+  font-weight: 800;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 2px 12px rgba(0, 0, 0, 0.55);
+}
+
+/* wide row cards — mirror symmetry (first and last bento cell) */
+.bento > li:nth-child(1) .title,
+.bento > li:nth-child(7) .title {
+  font-size: 30px;
+  letter-spacing: 0.05em;
+}
+
+.arrow {
+  font-size: 22px;
+  line-height: 1;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.35s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease;
+  flex-shrink: 0;
+}
+
+.icon {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  z-index: 2;
+  opacity: 0.35;
+  transition: opacity 0.35s ease;
+  color: var(--text);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon svg {
+  width: 26px;
+  height: 26px;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  fill: none;
+}
+
+/* Stagger delays */
+.bento > li:nth-child(1) .card {
+  animation-delay: 0s;
+}
+.bento > li:nth-child(2) .card {
+  animation-delay: 0.05s;
+}
+.bento > li:nth-child(3) .card {
+  animation-delay: 0.1s;
+}
+.bento > li:nth-child(4) .card {
+  animation-delay: 0.15s;
+}
+.bento > li:nth-child(5) .card {
+  animation-delay: 0.2s;
+}
+.bento > li:nth-child(6) .card {
+  animation-delay: 0.25s;
+}
+.bento > li:nth-child(7) .card {
+  animation-delay: 0.3s;
+}
+
+@keyframes cardIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 700px) {
+  .bento {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: auto;
+  }
+  .bento > li:nth-child(n) {
+    grid-column: span 1;
+    min-height: 150px;
+  }
+  .bento > li:nth-child(1) {
+    grid-column: span 2;
+  }
+  .bento > li:nth-child(7) {
+    grid-column: span 2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bento .card {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .bento .card:hover,
+  .bento .card:focus-visible {
+    transform: none;
+  }
+}

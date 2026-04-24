@@ -5,6 +5,7 @@ import { CartProvider } from "@/context/CartContext";
 import CartDrawer from "@/components/CartDrawer";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import FooterRevealHost from "@/components/FooterRevealHost";
 
 // Outfit (variable, 100–900) — same family as fonts.googleapis.com/css2?family=Outfit
 const outfit = Outfit({
@@ -16,7 +17,12 @@ const outfit = Outfit({
 /** Avoid Vercel static prerender >60s when Miva is slow — render on demand instead. */
 export const dynamic = "force-dynamic";
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: "Cookshack — Smokers, Grills & Pizza Ovens",
     template: "%s | Cookshack",
@@ -35,9 +41,12 @@ async function RootLayoutInner({ children }: { children: React.ReactNode }) {
     <CartProvider>
       <Header />
       <CartDrawer />
-      {/* Offset for fixed header (contact + logo/search + category nav on md+) */}
-      <main className="pt-[188px] sm:pt-[188px] md:pt-[236px]">{children}</main>
-      <Footer />
+      <main className="relative z-10 min-h-[100dvh] bg-white pt-[188px] sm:pt-[188px] md:pt-[236px]">
+        {children}
+      </main>
+      <FooterRevealHost>
+        <Footer />
+      </FooterRevealHost>
     </CartProvider>
   );
 }

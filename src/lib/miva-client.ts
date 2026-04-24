@@ -386,20 +386,52 @@ export async function getCategories(): Promise<MivaListResponse<MivaCategory>> {
   });
 }
 
+/**
+ * Resolves a category by Miva `code`. Some Miva API configs return a non-matching
+ * first row when the `code` filter is ignored, which made every /category/… page
+ * show the same name (e.g. Residential). We always verify `row.code` matches, then
+ * fall back to scanning active categories.
+ */
 export async function getCategoryByCode(
   code: string
 ): Promise<MivaApiResponse<MivaCategory>> {
-  // Category_Load_Code is not a valid Miva function — use list query filtered by code
+  const want = code.trim();
+  if (!want) {
+    return { success: 0 as unknown as boolean };
+  }
+
   const res = await mivaListRequest<MivaCategory>({
     Function: "CategoryList_Load_Query",
     Count: 1,
-    Filter: [{ name: "code", operator: "EQ", value: code }],
+    Filter: [{ name: "code", operator: "EQ", value: want }],
     ondemandcolumns: ["uris"],
   });
-  const cat = res.data?.[0] ?? null;
+  const first = res.data?.[0] ?? null;
+  const matchByCode = (c: MivaCategory | null) =>
+    c &&
+    typeof c.code === "string" &&
+    c.code.toLowerCase() === want.toLowerCase();
+  let cat: MivaCategory | null = matchByCode(first) ? first! : null;
+
+  if (!cat) {
+    const wide = await mivaListRequest<MivaCategory>({
+      Function: "CategoryList_Load_Query",
+      Count: 500,
+      Filter: [{ name: "active", operator: "EQ", value: true }],
+      ondemandcolumns: ["uris"],
+    });
+    cat =
+      wide.data?.find(
+        (c) => c.code.toLowerCase() === want.toLowerCase()
+      ) ?? null;
+  }
+
+  if (!cat) {
+    return { success: 0 as unknown as boolean };
+  }
   return {
-    success: cat ? (1 as unknown as boolean) : (0 as unknown as boolean),
-    data: cat as MivaCategory,
+    success: 1 as unknown as boolean,
+    data: cat,
   };
 }
 

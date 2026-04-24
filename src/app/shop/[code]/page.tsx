@@ -39,6 +39,7 @@ import ProductCarouselSection from "@/components/product/ProductCarouselSection"
 import ProductExpertBand from "@/components/product/ProductExpertBand";
 import ProductReviewsPlaceholder from "@/components/product/ProductReviewsPlaceholder";
 import WhatsInTheBoxSection from "@/components/product/WhatsInTheBoxSection";
+import AffirmProductMessaging from "@/components/product/AffirmProductMessaging";
 import { IconArrowUturnLeft, IconCheckCircle, IconPhone, IconTruck } from "@/components/icons";
 
 interface PageProps {
@@ -298,6 +299,12 @@ export default async function ProductPage({ params }: PageProps) {
                   {inStock ? "In Stock" : "Out of Stock"}
                 </span>
               </div>
+
+              <AffirmProductMessaging
+                className="mt-1"
+                amountCents={Math.max(0, Math.round((product.price ?? 0) * 100))}
+                sku={product.sku?.trim() || product.code}
+              />
 
               <p className="text-sm text-[#565959]">
                 <span className="font-medium text-[#0F1111]">FREE shipping</span> on many qualifying orders to the lower

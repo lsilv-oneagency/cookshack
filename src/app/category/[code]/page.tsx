@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getAllCategoryProducts, getCategories, getCategoryByCode } from "@/lib/miva-client";
+import { getCategoryHeroTitle } from "@/lib/category-hero-title";
 import { filterStorefrontProducts } from "@/lib/miva-storefront-visibility";
 import CatalogHeroBand from "@/components/CatalogHeroBand";
 import CategoryShopClient from "@/components/category/CategoryShopClient";
@@ -16,9 +17,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   try {
     const res = await getCategoryByCode(decodeURIComponent(code));
     const cat = res.data;
+    const title = cat ? getCategoryHeroTitle(cat) : "Category";
+    const plain = cat?.descrip?.replace(/<[^>]*>/g, "") ?? "";
     return {
-      title: cat?.name || "Category",
-      description: `Shop Cookshack ${cat?.name || "products"} — ${cat?.descrip?.replace(/<[^>]*>/g, "").slice(0, 130) || ""}`,
+      title,
+      description: `Shop Cookshack ${title} — ${plain.slice(0, 130)}`.trim(),
     };
   } catch {
     return { title: "Category" };
@@ -83,6 +86,8 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
     notFound();
   }
 
+  const heroTitle = getCategoryHeroTitle(category);
+
   try {
     const [rawProducts, catsRes] = await Promise.all([
       getAllCategoryProducts(decodedCode, "name"),
@@ -97,16 +102,19 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   return (
     <>
       {/* Category header */}
-      <CatalogHeroBand paddingClassName="py-10 sm:py-14">
+      <CatalogHeroBand
+        key={decodedCode}
+        paddingClassName="py-10 sm:py-14"
+      >
         <nav className="flex items-center gap-2 text-xs text-[#6B6B6B] mb-4">
           <Link href="/" className="hover:text-[#D52324] transition">Home</Link>
           <span>/</span>
           <Link href="/shop" className="hover:text-[#D52324] transition">Shop</Link>
           <span>/</span>
-          <span className="text-[#9A9A9A]">{category.name}</span>
+          <span className="text-[#9A9A9A]">{heroTitle}</span>
         </nav>
         <h1 className="font-heading font-extrabold text-white text-4xl sm:text-5xl tracking-wider uppercase leading-tight">
-          {category.name}
+          {heroTitle}
         </h1>
         {category.descrip && (
           <p
@@ -130,7 +138,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
           ) : (
             <CategoryShopClient
               products={products}
-              categoryName={category.name}
+              categoryName={heroTitle}
               currentCategoryCode={category.code}
               allCategories={allCategories}
               initialSort={initialSort}

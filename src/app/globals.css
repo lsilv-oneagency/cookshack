@@ -102,4 +102,22 @@
   .text-shadow-lg {
     text-shadow: 0 4px 20px rgba(0,0,0,0.8);
   }
+
+  /* Shop category strip — one-shot lens flare on hover in */
+  @keyframes shop-cat-shine {
+    0% {
+      transform: translate3d(-95%, 0, 0) skewX(-22deg);
+      opacity: 0;
+    }
+    18% {
+      opacity: 0.75;
+    }
+    100% {
+      transform: translate3d(230%, 0, 0) skewX(-22deg);
+      opacity: 0;
+    }
+  }
+  .shop-cat-shine-anim {
+    animation: shop-cat-shine 0.95s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  }
 }

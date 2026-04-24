@@ -6,7 +6,9 @@ import { filterStorefrontProducts } from "@/lib/miva-storefront-visibility";
 import ProductCard from "@/components/ProductCard";
 import ProductImage from "@/components/ProductImage";
 import NothingBeatsCallout from "@/components/NothingBeatsCallout";
+import ShopCategoryStrip from "@/components/ShopCategoryStrip";
 import HeroBackground from "@/components/HeroBackground";
+import type { Metadata } from "next";
 import type { MivaProduct } from "@/types/miva";
 import {
   IconCog,
@@ -20,6 +22,36 @@ const IMG = (p: string) => `/api/img?p=${encodeURIComponent(`mm5/graphics/000000
 
 
 export const revalidate = 300;
+
+const HOME_OG_PATH = "/images/shop-commercial.png";
+const homeTitle =
+  "Cookshack | Commercial Smokers, Pellet Grills & Electric Smokers — Made in Oklahoma Since 1962";
+/* ~155–160 characters for search snippets. */
+const homeDescription =
+  "American-made smokers, wood pellet grills & pizza ovens, Ponca City, OK, since 1962. Restaurants in all 50 states & serious pitmasters. Financing available.";
+const homeOgImageAlt =
+  "Cookshack commercial smoker in a working restaurant kitchen, Ponca City Oklahoma";
+
+export const metadata: Metadata = {
+  title: { absolute: homeTitle },
+  description: homeDescription,
+  openGraph: {
+    title: homeTitle,
+    description: homeDescription,
+    images: [
+      {
+        url: HOME_OG_PATH,
+        alt: homeOgImageAlt,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: homeTitle,
+    description: homeDescription,
+    images: [HOME_OG_PATH],
+  },
+};
 
 // Pull hero behind fixed glass header: offsets ≈ contact bar + logo + search (+ category nav md+).
 const HERO_UNDER_HEADER =
@@ -75,14 +107,23 @@ function Hero() {
 // ── Full-width shop split: commercial | residential ────────────────────────
 const SHOP_SPLIT_COLUMNS = [
   {
+    eyebrow: "For restaurants & pros",
     title: "Pro-Grade Grills & Smokers",
-    href: "/category/ctgy_commercial_products",
+    subhead:
+      "Built for restaurants, caterers, and pitmasters who demand consistency. Six decades of proof.",
+    stat: "120–750 lb capacity | NSF / USDA certified | Net 30 financing",
+    cta: "Request a quote",
+    href: "/commercial-inquiries",
     image: "/images/shop-commercial.png",
     alt: "Chef using a Cookshack commercial smoker in a professional kitchen",
   },
   {
+    eyebrow: "For the backyard",
     title: "Home Grills & Smokers",
-    href: "/category/ctgy_residential_equipment",
+    subhead: "Commercial-grade quality, sized for the backyard that takes barbecue seriously.",
+    stat: "Electric, pellet & pizza ovens | From $1,285 | Affirm financing",
+    cta: "Shop residential",
+    href: "/residential",
     image: "/images/shop-residential.png",
     alt: "Cooking with a Cookshack smoker in a backyard patio setting",
   },
@@ -108,13 +149,22 @@ function CategoryCards() {
               sizes="(max-width: 768px) 100vw, 50vw"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-black/30 group-hover:via-black/50 transition-colors duration-300" />
-            <div className="relative z-10 flex flex-col items-center justify-center px-6 py-16 text-center">
-              <h2 className="font-heading font-extrabold text-3xl sm:text-4xl md:text-5xl text-white tracking-wider uppercase leading-tight max-w-lg text-shadow-lg">
+            <div className="relative z-10 mx-auto flex max-w-xl flex-col items-center justify-center px-6 py-16 text-center">
+              <p className="mb-2 text-[10px] font-heading font-bold uppercase tracking-[0.2em] text-[#D52324] sm:text-xs">
+                {col.eyebrow}
+              </p>
+              <h2 className="max-w-lg text-balance font-heading text-3xl font-extrabold uppercase leading-tight tracking-wider text-white text-shadow-lg sm:text-4xl md:text-5xl">
                 {col.title}
               </h2>
-              <span className="mt-6 inline-flex items-center gap-2 text-[#D52324] font-heading font-bold text-sm tracking-widest uppercase group-hover:gap-3 transition-all">
-                Shop now
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <p className="mt-3 max-w-md text-sm leading-relaxed text-white/90 sm:text-base">
+                {col.subhead}
+              </p>
+              <p className="mt-4 max-w-lg text-[9px] font-heading font-bold uppercase leading-snug tracking-[0.12em] text-white/80 sm:text-[10px] sm:tracking-[0.14em]">
+                {col.stat}
+              </p>
+              <span className="mt-6 inline-flex items-center gap-2 text-[#D52324] font-heading text-sm font-bold uppercase tracking-widest transition-all group-hover:gap-3">
+                {col.cta}
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
               </span>
@@ -396,24 +446,66 @@ function WhyCookshack() {
 }
 
 // ── Top Products ──────────────────────────────────────────────────────────
-async function TopProducts() {
-  let products: Awaited<ReturnType<typeof getProducts>>["data"] = [];
+const TOP_PRODUCTS_COUNT = 12;
+
+/** Featured in Miva may only list a few SKUs — keep filling from other sources until we hit the cap. */
+async function loadTopProductsForHome(): Promise<MivaProduct[]> {
+  const seen = new Set<string>();
+  const out: MivaProduct[] = [];
+  const max = TOP_PRODUCTS_COUNT;
+
+  const pushUnique = (batch: MivaProduct[]) => {
+    for (const p of filterStorefrontProducts(batch)) {
+      if (out.length >= max) return;
+      const k = (p.code || "").toLowerCase();
+      if (!k || seen.has(k)) continue;
+      seen.add(k);
+      out.push(p);
+    }
+  };
+
+  const tryFeatured = async () => {
+    const res = await getCategoryProducts("cat_featured_products", { count: 48, sort: "disp_order" });
+    pushUnique(res.data || []);
+  };
+  const tryResidential = async () => {
+    const res = await getCategoryProducts("ctgy_residential_equipment", { count: 48, sort: "disp_order" });
+    pushUnique(res.data || []);
+  };
+  const tryCatalog = async () => {
+    const res = await getProducts({ count: 80, sort: "disp_order" });
+    pushUnique(res.data || []);
+  };
+
   try {
-    // Use the Featured Products category — real hero products with images.
-    // Fall back to residential equipment if featured is empty.
-    const res = await getCategoryProducts("cat_featured_products", { count: 16, sort: "disp_order" });
-    products = filterStorefrontProducts(res.data || []).slice(0, 8);
-    if (products.length === 0) {
-      const fallback = await getCategoryProducts("ctgy_residential_equipment", { count: 16, sort: "disp_order" });
-      products = filterStorefrontProducts(fallback.data || []).slice(0, 8);
-    }
+    await tryFeatured();
   } catch {
+    // continue
+  }
+  if (out.length < max) {
     try {
-      const res = await getProducts({ count: 24, sort: "disp_order" });
-      products = filterStorefrontProducts(res.data || []).slice(0, 8);
+      await tryResidential();
     } catch {
-      // silently fail — section simply won't show
+      // continue
     }
+  }
+  if (out.length < max) {
+    try {
+      await tryCatalog();
+    } catch {
+      // continue
+    }
+  }
+
+  return out;
+}
+
+async function TopProducts() {
+  let products: MivaProduct[] = [];
+  try {
+    products = await loadTopProductsForHome();
+  } catch {
+    // section hidden
   }
 
   if (products.length === 0) return null;
@@ -515,6 +607,7 @@ export default async function HomePage() {
       <FeaturedProduct />
       <NothingBeatsCallout />
       <TopProducts />
+      <ShopCategoryStrip />
       <Testimonials />
       <WhyCookshack />
     </>
