@@ -1,11 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
-import { mivaImgUrl } from "@/components/ProductImage";
+import ProductImage from "@/components/ProductImage";
 import CatalogHeroBand from "@/components/CatalogHeroBand";
-import { IconLockClosed, IconPhone, IconPhoto, IconShoppingCart } from "@/components/icons";
+import { IconLockClosed, IconPhone, IconShoppingCart } from "@/components/icons";
 
 export default function CartPage() {
   const { items, removeItem, updateQty, total, clearCart } = useCart();
@@ -58,25 +57,19 @@ export default function CartPage() {
               <div className="lg:col-span-2 space-y-4">
                 {items.map((item) => {
                   const rawImg = (item.product_image || item.product_thumbnail || "").trim();
-                  const imgUrl = rawImg ? mivaImgUrl(rawImg) : "";
 
                   return (
                     <div key={item.product_code} className="flex gap-5 p-5 bg-white border border-[#E8E0D8] rounded shadow-sm hover:border-[#D52324]/30 transition">
-                      <div className="relative w-24 h-24 flex-shrink-0 bg-white border border-[#E8E0D8] rounded overflow-hidden">
-                        {imgUrl ? (
-                          <Image
-                            src={imgUrl}
-                            alt={item.product_name}
-                            fill
-                            className="object-contain p-2"
-                            sizes="96px"
-                            unoptimized
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-[#F0EBE3] text-[#9A9A9A]">
-                            <IconPhoto className="w-10 h-10" aria-hidden />
-                          </div>
-                        )}
+                      <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded border border-[#E8E0D8] bg-white">
+                        <ProductImage
+                          src={rawImg || undefined}
+                          alt={item.product_name}
+                          productCode={item.product_code}
+                          productName={item.product_name}
+                          fill
+                          className="object-contain p-2"
+                          sizes="96px"
+                        />
                       </div>
 
                       <div className="flex-1 min-w-0">

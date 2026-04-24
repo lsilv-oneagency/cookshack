@@ -27,8 +27,13 @@ type CartAction =
   | { type: "CLOSE_CART" }
   | { type: "SET_LOADING"; loading: boolean };
 
+interface AddItemOptions {
+  /** When false, adds to cart without opening the cart drawer (e.g. batched "Add all" on PDP). Default true. */
+  openCart?: boolean;
+}
+
 interface CartContextValue extends CartState {
-  addItem: (item: Omit<CartItem, "total">) => Promise<void>;
+  addItem: (item: Omit<CartItem, "total">, options?: AddItemOptions) => Promise<void>;
   removeItem: (product_code: string) => void;
   updateQty: (product_code: string, quantity: number) => void;
   clearCart: () => void;
@@ -162,7 +167,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [state.sessionId]);
 
   const addItem = useCallback(
-    async (item: Omit<CartItem, "total">) => {
+    async (item: Omit<CartItem, "total">, options?: AddItemOptions) => {
+      const openCart = options?.openCart !== false;
       dispatch({ type: "SET_LOADING", loading: true });
       try {
         const sessionId = await ensureSession();
@@ -183,14 +189,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           type: "ADD_ITEM",
           item: { ...item, total: item.quantity * item.product_price },
         });
-        dispatch({ type: "TOGGLE_CART" });
+        if (openCart) dispatch({ type: "TOGGLE_CART" });
       } catch (err) {
         console.error("addItem error", err);
         dispatch({
           type: "ADD_ITEM",
           item: { ...item, total: item.quantity * item.product_price },
         });
-        dispatch({ type: "TOGGLE_CART" });
+        if (openCart) dispatch({ type: "TOGGLE_CART" });
       } finally {
         dispatch({ type: "SET_LOADING", loading: false });
       }

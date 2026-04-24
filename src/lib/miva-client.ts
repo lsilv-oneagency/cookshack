@@ -9,6 +9,33 @@ import type {
   ProductListQueryParams,
   SearchFilter,
 } from "@/types/miva";
+import {
+  isNonPurchasableStorefrontProduct,
+  isPdpRelatedPair,
+} from "@/lib/miva-storefront-visibility";
+
+/**
+ * Ondemand columns for product list — description, all custom fields, images, options,
+ * categories, true related products, and shipping box dimensions. See Miva
+ * `ProductList_Load_Query` ondemand column docs.
+ */
+export const MIVA_PRODUCT_ON_DEMAND_COLUMNS = [
+  "descrip",
+  "catcount",
+  "uris",
+  // `:*` is not accepted on all Miva / token configs — base column still returns all assigned fields.
+  "CustomField_Values",
+  "productimagedata",
+  "attributes",
+  "categories",
+  "productshippingrules",
+  "relatedproduct",
+  "productinventorysettings",
+  "cancat_code",
+  "url",
+  "page_code",
+  "product_inventory",
+] as const;
 
 const STORE_URL = process.env.MIVA_STORE_URL || "";
 const API_TOKEN = process.env.MIVA_API_TOKEN || "";
@@ -117,7 +144,7 @@ export async function getProducts(
       { name: "active", operator: "EQ", value: true },
       ...filter,
     ],
-    ondemandcolumns: ["catcount", "uris", "CustomField_Values", "productimagedata"],
+    ondemandcolumns: [...MIVA_PRODUCT_ON_DEMAND_COLUMNS],
   });
 }
 
@@ -131,11 +158,11 @@ const getProductCatalog = unstable_cache(
       Function: "ProductList_Load_Query",
       Count: 999,
       Filter: [{ name: "active", operator: "EQ", value: true }],
-      ondemandcolumns: ["uris", "productimagedata"],
+      ondemandcolumns: [...MIVA_PRODUCT_ON_DEMAND_COLUMNS],
     });
     return res.data || [];
   },
-  ["miva-product-catalog"],
+  ["miva-product-catalog", "v5-cfval"],
   { revalidate: 300 } // 5-minute cache
 );
 
@@ -168,7 +195,7 @@ export async function searchProducts(
     Count: count,
     Offset: offset,
     Filter: filter,
-    ondemandcolumns: ["uris", "productimagedata"],
+    ondemandcolumns: [...MIVA_PRODUCT_ON_DEMAND_COLUMNS],
   });
 }
 
@@ -185,8 +212,114 @@ export async function getCategoryProducts(
     Offset: offset,
     Sort: sort,
     Filter: [{ name: "active", operator: "EQ", value: true }],
-    ondemandcolumns: ["uris", "productimagedata"],
+    ondemandcolumns: [...MIVA_PRODUCT_ON_DEMAND_COLUMNS],
   });
+}
+
+/**
+ * Merges Miva “related product” admin assignments (when present) with other products
+ * from the **same Miva category(ies)** as the current PDP. Previously the fallback was
+ * the first N products **store-wide** by `disp_order`, which mixed unrelated departments
+ * (e.g. smokers with sauces or content SKUs in the same global slice).
+ *
+ * Admin-assigned related items are only kept if they share a category with the current
+ * product (after resolving stubs against the cached catalog so category fields exist).
+ */
+export async function getRelatedProducts(
+  excludeCode: string,
+  limit: number = 8,
+  current?: MivaProduct
+): Promise<MivaProduct[]> {
+  try {
+    const seen = new Set<string>([excludeCode.toLowerCase()]);
+    const out: MivaProduct[] = [];
+
+    const catalog = await getProductCatalog();
+    const resolveFull = (p: MivaProduct): MivaProduct =>
+      catalog.find((x) => x.code.toLowerCase() === p.code.toLowerCase()) ?? p;
+
+    const currentFull = current ? resolveFull(current) : undefined;
+    const hasCategoryContext = (currentFull?.categories?.length ?? 0) > 0;
+
+    const fromApi =
+      (current?.relatedproducts?.length ? current.relatedproducts : null) ||
+      (current?.relatedproduct?.length ? current.relatedproduct : null);
+    if (Array.isArray(fromApi) && currentFull) {
+      for (const p of fromApi) {
+        if (!p?.code || seen.has(p.code.toLowerCase())) continue;
+        const candidate = resolveFull(p);
+        if (isNonPurchasableStorefrontProduct(candidate)) continue;
+        if (!isPdpRelatedPair(currentFull, candidate)) continue;
+        seen.add(p.code.toLowerCase());
+        out.push(candidate);
+        if (out.length >= limit) return out;
+      }
+    }
+
+    if (out.length < limit && hasCategoryContext && currentFull?.categories?.length) {
+      for (const cat of currentFull.categories) {
+        if (!cat.code || out.length >= limit) break;
+        try {
+          const res = await getCategoryProducts(cat.code, {
+            count: 80,
+            offset: 0,
+            sort: "disp_order",
+          });
+          for (const p of res.data || []) {
+            if (!p?.code || seen.has(p.code.toLowerCase())) continue;
+            const candidate = resolveFull(p);
+            if (isNonPurchasableStorefrontProduct(candidate)) continue;
+            if (!isPdpRelatedPair(currentFull, candidate)) continue;
+            seen.add(p.code.toLowerCase());
+            out.push(candidate);
+            if (out.length >= limit) return out;
+          }
+        } catch {
+          // try next category
+        }
+      }
+    }
+
+    // Default category code (Miva) — when `categories` is empty, this still finds shelf-mates.
+    if (out.length < limit && currentFull?.cancat_code) {
+      try {
+        const res = await getCategoryProducts(currentFull.cancat_code, {
+          count: 80,
+          offset: 0,
+          sort: "disp_order",
+        });
+        for (const p of res.data || []) {
+          if (!p?.code || seen.has(p.code.toLowerCase())) continue;
+          const candidate = resolveFull(p);
+          if (isNonPurchasableStorefrontProduct(candidate)) continue;
+          if (!isPdpRelatedPair(currentFull, candidate)) continue;
+          seen.add(p.code.toLowerCase());
+          out.push(candidate);
+          if (out.length >= limit) return out;
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    // In-memory pass: same JSON catalog as PDP — fills gaps when per-category API lists are empty.
+    if (out.length < limit && currentFull) {
+      const rest = catalog
+        .filter((p) => p?.code && !seen.has(p.code.toLowerCase()) && !isNonPurchasableStorefrontProduct(p))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      for (const p of rest) {
+        if (out.length >= limit) break;
+        if (p.code.toLowerCase() === excludeCode.toLowerCase()) continue;
+        if (!isPdpRelatedPair(currentFull, p)) continue;
+        seen.add(p.code.toLowerCase());
+        out.push(p);
+      }
+    }
+
+    return out;
+  } catch {
+    return [];
+  }
 }
 
 // ─── Categories ──────────────────────────────────────────────────────────────

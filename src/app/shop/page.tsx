@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getProducts } from "@/lib/miva-client";
+import { filterStorefrontProducts } from "@/lib/miva-storefront-visibility";
 import ProductGrid from "@/components/ProductGrid";
 import Pagination from "@/components/Pagination";
 import CatalogHeroBand from "@/components/CatalogHeroBand";
@@ -29,7 +30,7 @@ export default async function ShopPage({ searchParams }: PageProps) {
 
   try {
     const res = await getProducts({ count: PAGE_SIZE, offset, sort });
-    products = res.data || [];
+    products = filterStorefrontProducts(res.data || []);
     totalCount = res.total_count || 0;
   } catch (e) {
     error = e instanceof Error ? e.message : "Failed to load products";

@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
+import { getProductFeatureTeaser } from "@/lib/miva-product-features";
+import { getPrimaryProductImagePath } from "@/lib/miva-product-images";
 import ProductImage from "./ProductImage";
 import type { MivaProduct } from "@/types/miva";
 
@@ -34,8 +36,9 @@ function CardStarDecor() {
 export default function ProductCard({ product, categoryLabel }: ProductCardProps) {
   const { addItem, isLoading } = useCart();
   const [adding, setAdding] = useState(false);
+  const featureLine = useMemo(() => getProductFeatureTeaser(product), [product]);
 
-  const rawImg = product.image || product.thumbnail || "";
+  const rawImg = getPrimaryProductImagePath(product);
   const inStock = product.inv1 === undefined || product.inv1 > 0;
   const priceDisplay = product.formatted_price || `$${product.price?.toFixed(2) ?? "—"}`;
 
@@ -51,8 +54,8 @@ export default function ProductCard({ product, categoryLabel }: ProductCardProps
         product_sku: product.sku,
         product_price: product.price,
         product_formatted_price: product.formatted_price,
-        product_image: rawImg,
-        product_thumbnail: product.thumbnail || "",
+        product_image: rawImg || product.image || "",
+        product_thumbnail: product.thumbnail || rawImg || "",
         quantity: 1,
       });
     } finally {
@@ -90,6 +93,9 @@ export default function ProductCard({ product, categoryLabel }: ProductCardProps
           <h3 className="line-clamp-1 text-base font-bold leading-snug text-neutral-900">
             {product.name}
           </h3>
+          {featureLine ? (
+            <p className="line-clamp-2 text-xs leading-snug text-[#5C5C5C]">{featureLine}</p>
+          ) : null}
           <CardStarDecor />
           <p className="text-xl font-bold text-neutral-900">{priceDisplay}</p>
         </div>

@@ -9,7 +9,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "verify:related": "npx --yes tsx scripts/verify-related.ts"
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.19",

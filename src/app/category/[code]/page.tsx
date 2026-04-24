@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getCategoryByCode, getCategoryProducts } from "@/lib/miva-client";
+import { filterStorefrontProducts } from "@/lib/miva-storefront-visibility";
 import ProductGrid from "@/components/ProductGrid";
 import Pagination from "@/components/Pagination";
 import CatalogHeroBand from "@/components/CatalogHeroBand";
@@ -89,7 +90,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
 
   try {
     const prodRes = await getCategoryProducts(decodedCode, { count: PAGE_SIZE, offset, sort });
-    products = prodRes.data || [];
+    products = filterStorefrontProducts(prodRes.data || []);
     totalCount = prodRes.total_count || 0;
   } catch (e) {
     error = e instanceof Error ? e.message : "Failed to load products";

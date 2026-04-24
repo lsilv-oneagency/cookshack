@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext";
-import type { MivaCategory, MivaProduct } from "@/types/miva";
+import { getPrimaryProductImagePath } from "@/lib/miva-product-images";
+import type { MivaProduct } from "@/types/miva";
 import { IconPhone } from "@/components/icons";
 import ProductImage from "@/components/ProductImage";
 import { CookshackLogoLockup } from "@/components/CookshackLogo";
@@ -32,11 +33,7 @@ const NAV_ITEMS: NavItem[] = [
 const MEGA_PRODUCT_COUNT = 8;
 const MEGA_FETCH_MS = 20_000;
 
-interface HeaderProps {
-  categories?: MivaCategory[];
-}
-
-export default function Header({ categories: _categories = [] }: HeaderProps) {
+export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const { itemCount, toggleCart } = useCart();
@@ -385,7 +382,7 @@ export default function Header({ categories: _categories = [] }: HeaderProps) {
                       >
                         <div className="relative h-16 w-full bg-white sm:h-20 md:h-24">
                           <ProductImage
-                            src={p.image || p.thumbnail || undefined}
+                            src={getPrimaryProductImagePath(p) || undefined}
                             alt={p.name}
                             productCode={p.code}
                             productName={p.name}

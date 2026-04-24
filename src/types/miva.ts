@@ -14,6 +14,62 @@ export interface MivaListResponse<T> {
   start_offset: number;
 }
 
+export interface MivaProductAttributeOption {
+  id: number;
+  product_id: number;
+  attr_id: number;
+  disp_order: number;
+  code: string;
+  prompt: string;
+  price: number;
+  cost: number;
+  weight: number;
+  image: string;
+}
+
+export interface MivaProductAttribute {
+  id: number;
+  product_id: number;
+  default_id: number;
+  disp_order: number;
+  attemp_id: number;
+  code: string;
+  type: string;
+  prompt: string;
+  price: number;
+  cost: number;
+  weight: number;
+  required: boolean;
+  inventory: boolean;
+  image: string;
+  options: MivaProductAttributeOption[];
+}
+
+export interface MivaProductCategoryRef {
+  id: number;
+  parent_id: number;
+  agrpcount: number;
+  depth: number;
+  disp_order: number;
+  page_id: number;
+  code: string;
+  name: string;
+  page_title: string;
+  active: boolean;
+  dt_created: number;
+  dt_Updated: number;
+}
+
+export interface MivaProductShippingRules {
+  product_id?: number;
+  ownpackage: boolean;
+  width: number;
+  length: number;
+  height: number;
+  limitmeths: boolean;
+  methods: unknown[];
+}
+
 export interface MivaProduct {
   id: number;
   code: string;
@@ -31,8 +87,33 @@ export interface MivaProduct {
   descrip: string;
   catcount: number;
   uris: MivaProductUri[];
-  CustomField_Values?: Record<string, unknown>;
+  page_title?: string;
+  cancat_code?: string;
+  page_code?: string;
+  product_inventory?: number;
+  product_inventory_active?: boolean;
+  url?: string;
+  /**
+   * Some Miva/aggregate APIs expose a dedicated features payload (string, array, or structured list).
+   * @see `extractApiFeatureLines` in miva-product-features.ts
+   */
+  features?: unknown;
+  /** Miva may return an object map or an array of field rows — see `getProductCustomFieldRows`. */
+  CustomField_Values?: Record<string, unknown> | unknown[] | null;
   productimagedata?: MivaProductImage[];
+  /** Ondemand: variant / runtime attributes (configurable product options). */
+  attributes?: MivaProductAttribute[];
+  /** Ondemand: category assignments. */
+  categories?: MivaProductCategoryRef[];
+  productshippingrules?: MivaProductShippingRules;
+  /** Ondemand: inventory / stock messaging from Miva. */
+  productinventorysettings?: {
+    in_short?: string;
+    in_long?: string;
+  };
+  /** Ondemand: true related assignments from the admin (see `getRelatedProducts`). */
+  relatedproduct?: MivaProduct[];
+  relatedproducts?: MivaProduct[];
 }
 
 export interface MivaProductUri {
@@ -47,6 +128,8 @@ export interface MivaProductImage {
   image_id: number;
   default_image: boolean;
   image: string;
+  /** Gallery sort order from Miva when present. */
+  disp_order?: number;
 }
 
 export interface MivaCategory {

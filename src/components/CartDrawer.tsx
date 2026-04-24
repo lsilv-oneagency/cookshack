@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import Image from "next/image";
+import { useEffect } from "react";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
-import { mivaImgUrl } from "@/components/ProductImage";
-import { IconPhoto, IconShoppingCart } from "@/components/icons";
+import ProductImage from "@/components/ProductImage";
+import { IconShoppingCart } from "@/components/icons";
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, updateQty, total, itemCount } = useCart();
@@ -38,25 +37,25 @@ export default function CartDrawer() {
         role="dialog"
         aria-modal="true"
         aria-label="Shopping cart"
-        className={`fixed top-0 right-0 z-50 h-full w-full max-w-md bg-[#111111] flex flex-col shadow-2xl transition-transform duration-300 ${
+        className={`fixed top-0 right-0 z-50 flex h-full w-full max-w-md flex-col border-l border-[#E8E0D8] bg-white shadow-2xl transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#2B2B2B]">
+        <div className="flex items-center justify-between border-b border-[#E8E0D8] px-6 py-4">
           <div className="flex items-center gap-3">
-            <h2 className="font-heading font-bold text-white text-xl tracking-wider uppercase">
+            <h2 className="font-heading text-xl font-bold tracking-wider text-[#1A1A1A] uppercase">
               Your Cart
             </h2>
             {itemCount > 0 && (
-              <span className="bg-[#D52324] text-white text-xs font-bold px-2 py-0.5 rounded-full">
+              <span className="rounded-full bg-[#D52324] px-2 py-0.5 text-xs font-bold text-white">
                 {itemCount}
               </span>
             )}
           </div>
           <button
             onClick={closeCart}
-            className="p-2 text-[#6B6B6B] hover:text-white hover:bg-[#2B2B2B] rounded transition"
+            className="rounded p-2 text-[#6B6B6B] transition hover:bg-[#F0EBE3] hover:text-[#1A1A1A]"
             aria-label="Close"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,13 +67,13 @@ export default function CartDrawer() {
         {/* Items */}
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
           {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center gap-5 py-16">
-              <IconShoppingCart className="w-16 h-16 text-[#D52324]" aria-hidden />
+            <div className="flex h-full flex-col items-center justify-center gap-5 py-16 text-center">
+              <IconShoppingCart className="h-16 w-16 text-[#D52324]" aria-hidden />
               <div>
-                <p className="font-heading font-bold text-white text-lg tracking-wide uppercase">
+                <p className="font-heading text-lg font-bold tracking-wide text-[#1A1A1A] uppercase">
                   Your cart is empty
                 </p>
-                <p className="text-sm text-[#6B6B6B] mt-1">Add some Cookshack products!</p>
+                <p className="mt-1 text-sm text-[#6B6B6B]">Add some Cookshack products!</p>
               </div>
               <button
                 onClick={closeCart}
@@ -86,26 +85,22 @@ export default function CartDrawer() {
           ) : (
             items.map((item) => {
               const rawImg = (item.product_image || item.product_thumbnail || "").trim();
-              const imgUrl = rawImg ? mivaImgUrl(rawImg) : "";
 
               return (
-                <div key={item.product_code} className="flex gap-4 p-3 bg-[#1A1A1A] border border-[#2B2B2B] rounded">
-                  {/* Image */}
-                  <div className="relative w-20 h-20 flex-shrink-0 bg-[#2B2B2B] rounded overflow-hidden">
-                    {imgUrl ? (
-                      <Image
-                        src={imgUrl}
-                        alt={item.product_name}
-                        fill
-                        className="object-contain p-1.5"
-                        sizes="80px"
-                        unoptimized
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-[#6B6B6B]">
-                        <IconPhoto className="w-8 h-8" aria-hidden />
-                      </div>
-                    )}
+                <div
+                  key={item.product_code}
+                  className="flex gap-4 rounded-lg border border-[#E8E0D8] bg-[#FAFAFA] p-3"
+                >
+                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded border border-[#E8E0D8] bg-white">
+                    <ProductImage
+                      src={rawImg || undefined}
+                      alt={item.product_name}
+                      productCode={item.product_code}
+                      productName={item.product_name}
+                      fill
+                      className="object-contain p-1.5"
+                      sizes="80px"
+                    />
                   </div>
 
                   {/* Details */}
@@ -113,7 +108,7 @@ export default function CartDrawer() {
                     <Link
                       href={`/shop/${item.product_code}`}
                       onClick={closeCart}
-                      className="text-sm font-heading font-bold text-white uppercase tracking-wide line-clamp-2 hover:text-[#D52324] transition leading-snug"
+                      className="line-clamp-2 font-heading text-sm font-bold uppercase leading-snug tracking-wide text-[#1A1A1A] transition hover:text-[#D52324]"
                     >
                       {item.product_name}
                     </Link>
@@ -122,29 +117,32 @@ export default function CartDrawer() {
                     )}
                     <p className="text-sm font-bold text-[#D52324] mt-1">{item.product_formatted_price}</p>
 
-                    <div className="flex items-center justify-between mt-2">
-                      {/* Qty */}
-                      <div className="flex items-center border border-[#3D3D3D] rounded overflow-hidden bg-[#2B2B2B]">
+                    <div className="mt-2 flex items-center justify-between">
+                      <div className="flex items-center overflow-hidden rounded border border-[#D4C8BE] bg-white">
                         <button
                           onClick={() => updateQty(item.product_code, item.quantity - 1)}
-                          className="w-7 h-7 flex items-center justify-center text-[#9A9A9A] hover:text-white hover:bg-[#3D3D3D] transition text-sm font-bold"
+                          className="flex h-7 w-7 items-center justify-center text-sm font-bold text-[#6B6B6B] transition hover:bg-[#F0EBE3] hover:text-[#1A1A1A]"
                         >
                           −
                         </button>
-                        <span className="w-8 text-center text-sm font-bold text-white">{item.quantity}</span>
+                        <span className="w-8 text-center text-sm font-bold text-[#1A1A1A]">
+                          {item.quantity}
+                        </span>
                         <button
                           onClick={() => updateQty(item.product_code, item.quantity + 1)}
-                          className="w-7 h-7 flex items-center justify-center text-[#9A9A9A] hover:text-white hover:bg-[#3D3D3D] transition text-sm font-bold"
+                          className="flex h-7 w-7 items-center justify-center text-sm font-bold text-[#6B6B6B] transition hover:bg-[#F0EBE3] hover:text-[#1A1A1A]"
                         >
                           +
                         </button>
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-white">${item.total.toFixed(2)}</span>
+                        <span className="text-sm font-bold text-[#1A1A1A]">
+                          ${item.total.toFixed(2)}
+                        </span>
                         <button
                           onClick={() => removeItem(item.product_code)}
-                          className="p-1 text-[#3D3D3D] hover:text-red-400 transition"
+                          className="p-1 text-[#9A9A9A] transition hover:text-red-600"
                           aria-label="Remove"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -162,24 +160,26 @@ export default function CartDrawer() {
 
         {/* Footer */}
         {items.length > 0 && (
-          <div className="border-t border-[#2B2B2B] px-6 py-5 space-y-4">
+          <div className="space-y-4 border-t border-[#E8E0D8] bg-white px-6 py-5">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-[#9A9A9A] font-heading uppercase tracking-wider">Subtotal</span>
-              <span className="font-heading font-extrabold text-2xl text-white">${total.toFixed(2)}</span>
+              <span className="font-heading text-sm uppercase tracking-wider text-[#6B6B6B]">Subtotal</span>
+              <span className="font-heading text-2xl font-extrabold text-[#1A1A1A]">
+                ${total.toFixed(2)}
+              </span>
             </div>
-            <p className="text-xs text-[#6B6B6B] text-center">
+            <p className="text-center text-xs text-[#6B6B6B]">
               Shipping & taxes calculated at checkout
             </p>
             <a
               href={`${storeUrl}/checkout`}
-              className="block w-full py-4 text-center bg-[#D52324] text-white font-heading font-bold tracking-widest uppercase text-sm hover:brightness-[0.94] active:scale-[0.98] transition-all rounded"
+              className="block w-full rounded bg-[#D52324] py-4 text-center font-heading text-sm font-bold uppercase tracking-widest text-white transition-all hover:brightness-[0.94] active:scale-[0.98]"
             >
               Proceed to Checkout
             </a>
             <Link
               href="/cart"
               onClick={closeCart}
-              className="block w-full py-3 text-center text-xs font-heading font-bold tracking-widest uppercase text-[#9A9A9A] hover:text-white transition"
+              className="block w-full py-3 text-center font-heading text-xs font-bold uppercase tracking-widest text-[#6B6B6B] transition hover:text-[#D52324]"
             >
               View Cart
             </Link>

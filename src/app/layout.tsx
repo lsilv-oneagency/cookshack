@@ -5,8 +5,6 @@ import { CartProvider } from "@/context/CartContext";
 import CartDrawer from "@/components/CartDrawer";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { getCategories } from "@/lib/miva-client";
-import type { MivaCategory } from "@/types/miva";
 
 // Outfit (variable, 100–900) — same family as fonts.googleapis.com/css2?family=Outfit
 const outfit = Outfit({
@@ -33,17 +31,9 @@ export const metadata: Metadata = {
 };
 
 async function RootLayoutInner({ children }: { children: React.ReactNode }) {
-  let categories: MivaCategory[] = [];
-  try {
-    const res = await getCategories();
-    categories = res.data || [];
-  } catch {
-    // proceed without categories — nav degrades gracefully
-  }
-
   return (
     <CartProvider>
-      <Header categories={categories} />
+      <Header />
       <CartDrawer />
       {/* Offset for fixed header (contact + logo/search + category nav on md+) */}
       <main className="pt-[188px] sm:pt-[188px] md:pt-[236px]">{children}</main>

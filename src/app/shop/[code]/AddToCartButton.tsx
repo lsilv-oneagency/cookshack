@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
+import { getAllProductImagePaths } from "@/lib/miva-product-images";
 import type { MivaProduct } from "@/types/miva";
 
 interface Props {
@@ -19,14 +20,15 @@ export default function AddToCartButton({ product, inStock }: Props) {
     if (adding || !inStock) return;
     setAdding(true);
     try {
+      const paths = getAllProductImagePaths(product);
       await addItem({
         product_code: product.code,
         product_name: product.name,
         product_sku: product.sku,
         product_price: product.price,
         product_formatted_price: product.formatted_price,
-        product_image: product.image || "",
-        product_thumbnail: product.thumbnail || "",
+        product_image: paths[0] || product.image || "",
+        product_thumbnail: paths[1] || paths[0] || product.thumbnail || "",
         quantity,
       });
       setAdded(true);

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getProducts, getCategoryProducts } from "@/lib/miva-client";
+import { getPrimaryProductImagePath } from "@/lib/miva-product-images";
+import { filterStorefrontProducts } from "@/lib/miva-storefront-visibility";
 import ProductCard from "@/components/ProductCard";
 import ProductImage from "@/components/ProductImage";
 import NothingBeatsCallout from "@/components/NothingBeatsCallout";
@@ -184,16 +186,18 @@ async function FeaturedProduct() {
   let product: MivaProduct | null = null;
   try {
     const featured = await getCategoryProducts("cat_featured_products", {
-      count: 1,
+      count: 20,
       sort: "disp_order",
     });
-    product = featured.data?.[0] ?? null;
+    const sellable = filterStorefrontProducts(featured.data || []);
+    product = sellable[0] ?? null;
     if (!product) {
       const pizza = await getCategoryProducts("sub_ctgy_pizza_oven", {
-        count: 1,
+        count: 20,
         sort: "disp_order",
       });
-      product = pizza.data?.[0] ?? null;
+      const sellablePizza = filterStorefrontProducts(pizza.data || []);
+      product = sellablePizza[0] ?? null;
     }
   } catch {
     product = null;
@@ -207,11 +211,7 @@ async function FeaturedProduct() {
   const excerpt =
     plain.length > 220 ? `${plain.slice(0, 217).trimEnd()}…` : plain;
   const isPizzaSpotlight = /pizza|wood\s*fire/i.test(product.name);
-  const imgPath =
-    product.image ||
-    product.productimagedata?.find((i) => i.default_image)?.image ||
-    product.productimagedata?.[0]?.image ||
-    "";
+  const imgPath = getPrimaryProductImagePath(product);
 
   return (
     <section className="bg-[#1A1A1A] overflow-hidden relative">
@@ -406,16 +406,16 @@ async function TopProducts() {
   try {
     // Use the Featured Products category — real hero products with images.
     // Fall back to residential equipment if featured is empty.
-    const res = await getCategoryProducts("cat_featured_products", { count: 8, sort: "disp_order" });
-    products = res.data || [];
+    const res = await getCategoryProducts("cat_featured_products", { count: 16, sort: "disp_order" });
+    products = filterStorefrontProducts(res.data || []).slice(0, 8);
     if (products.length === 0) {
-      const fallback = await getCategoryProducts("ctgy_residential_equipment", { count: 8, sort: "disp_order" });
-      products = fallback.data || [];
+      const fallback = await getCategoryProducts("ctgy_residential_equipment", { count: 16, sort: "disp_order" });
+      products = filterStorefrontProducts(fallback.data || []).slice(0, 8);
     }
   } catch {
     try {
-      const res = await getProducts({ count: 8, sort: "disp_order" });
-      products = res.data || [];
+      const res = await getProducts({ count: 24, sort: "disp_order" });
+      products = filterStorefrontProducts(res.data || []).slice(0, 8);
     } catch {
       // silently fail — section simply won't show
     }

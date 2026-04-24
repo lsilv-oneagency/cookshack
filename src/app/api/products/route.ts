@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProducts, searchProducts, getCategoryProducts } from "@/lib/miva-client";
+import { filterStorefrontProducts } from "@/lib/miva-storefront-visibility";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -19,6 +20,11 @@ export async function GET(request: NextRequest) {
     } else {
       result = await getProducts({ count, offset, sort });
     }
+
+    result = {
+      ...result,
+      data: filterStorefrontProducts(result.data || []),
+    };
 
     return NextResponse.json(result);
   } catch (error) {

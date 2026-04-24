@@ -12,7 +12,7 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-white text-center sm:text-left">
             <p className="font-heading font-bold text-xl sm:text-2xl tracking-widest uppercase">
-              Questions? We're Here to Help.
+              Questions? We&apos;re Here to Help.
             </p>
             <p className="text-sm text-red-100 mt-0.5">
               Our BBQ experts are standing by Mon–Fri, 8am–5pm CT.
