@@ -33,10 +33,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files — default ignore; exceptions below are tracked on purpose.
+# env files — ignore all; only .env.example (template) is tracked.
 .env*
 !.env.example
-!.env.local
 
 # vercel
 .vercel
