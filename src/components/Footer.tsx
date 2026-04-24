@@ -47,7 +47,7 @@ export default function Footer() {
               <CookshackLogoLockup
                 align="start"
                 interactive
-                wordmarkClassName="h-9 max-w-[min(100%,18rem)] sm:h-10"
+                wordmarkClassName="h-12 max-w-[min(100%,22rem)] sm:h-14"
                 taglineClassName="mt-0.5 font-heading text-[8px] font-bold uppercase tracking-[0.2em] text-[#D52324]"
               />
             </Link>

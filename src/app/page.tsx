@@ -9,13 +9,9 @@ import NothingBeatsCallout from "@/components/NothingBeatsCallout";
 import HeroBackground from "@/components/HeroBackground";
 import type { MivaProduct } from "@/types/miva";
 import {
-  IconArrowUturnLeft,
   IconCog,
   IconFlame,
-  IconLockClosed,
-  IconPhone,
   IconPizza,
-  IconTruck,
   IconTrophy,
   IconUserGroup,
 } from "@/components/icons";
@@ -33,41 +29,44 @@ const HERO_UNDER_HEADER =
 function Hero() {
   return (
     <section
-      className={`relative ${HERO_UNDER_HEADER} flex min-h-[88svh] items-center overflow-hidden bg-[#111111]`}
+      className={`relative ${HERO_UNDER_HEADER} flex min-h-[max(120svh,56rem)] flex-col overflow-hidden bg-[#111111]`}
       aria-label="Cookshack hero"
     >
       <HeroBackground />
       {/* Dark overlay for text legibility */}
       <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/80 via-black/55 to-black/75" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 pb-16 pt-6 text-center sm:px-6 sm:pb-20 md:px-8 md:pb-28 md:pt-8">
-        <div className="flex flex-col items-center">
-          <h1 className="font-heading font-extrabold text-white leading-[1.05] text-shadow-lg mb-6">
-            <span className="block text-5xl sm:text-6xl lg:text-7xl tracking-wider">Legendary Smoke</span>
-            <span className="block text-5xl sm:text-6xl lg:text-7xl tracking-wider">Professional Grade</span>
-          </h1>
-          <p className="text-[#9A9A9A] text-base sm:text-lg leading-relaxed mb-8 max-w-2xl mx-auto font-body">
-            Handcrafted smokers and grills built for high-volume restaurants and ultimate backyard
-            pitmasters.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full">
-            <Link
-              href="/category/ctgy_residential_equipment"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#D52324] text-white font-heading font-bold tracking-widest uppercase text-sm hover:brightness-[0.94] active:scale-[0.98] transition-all rounded"
-            >
-              Shop Residential
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </Link>
-            <Link
-              href="/category/ctgy_commercial_products"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded border-2 border-white/45 bg-black/35 text-white text-shadow-sm backdrop-blur-sm font-heading font-bold tracking-widest uppercase text-sm hover:border-[#D52324] hover:bg-[#D52324]/10 hover:text-[#D52324] transition-all"
-            >
-              Shop Commercial
-            </Link>
+      <div className="relative z-10 flex min-h-0 w-full flex-1 flex-col">
+        <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center px-4 py-6 pb-8 text-center sm:px-6 sm:py-8 sm:pb-10 md:px-8 md:pb-12">
+          <div className="flex flex-col items-center">
+            <h1 className="mb-6 font-heading font-extrabold leading-[1.05] text-shadow-lg text-white">
+              <span className="block text-5xl tracking-wider sm:text-6xl lg:text-7xl">Legendary Smoke</span>
+              <span className="block text-5xl tracking-wider sm:text-6xl lg:text-7xl">Professional Grade</span>
+            </h1>
+            <p className="mx-auto mb-8 max-w-2xl font-body text-base leading-relaxed text-[#9A9A9A] sm:text-lg">
+              Handcrafted smokers and grills built for high-volume restaurants and ultimate backyard
+              pitmasters.
+            </p>
+            <div className="flex w-full flex-col items-center justify-center gap-4 sm:flex-row">
+              <Link
+                href="/category/ctgy_residential_equipment"
+                className="inline-flex items-center justify-center gap-2 rounded bg-[#D52324] px-8 py-4 font-heading text-sm font-bold uppercase tracking-widest text-white transition-all hover:brightness-[0.94] active:scale-[0.98]"
+              >
+                Shop Residential
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
+              <Link
+                href="/category/ctgy_commercial_products"
+                className="inline-flex items-center justify-center gap-2 rounded border-2 border-white/45 bg-black/35 px-8 py-4 font-heading text-sm font-bold uppercase tracking-widest text-white text-shadow-sm backdrop-blur-sm transition-all hover:border-[#D52324] hover:bg-[#D52324]/10 hover:text-[#D52324]"
+              >
+                Shop Commercial
+              </Link>
+            </div>
           </div>
         </div>
+        <TrustBar variant="inHero" />
       </div>
     </section>
   );
@@ -453,29 +452,54 @@ async function TopProducts() {
 }
 
 // ── Trust bar ─────────────────────────────────────────────────────────────
-function TrustBar() {
+const TRUST_BAR_ITEMS: {
+  iconSrc: string;
+  label: string;
+  sub?: string;
+  /** Bigger than default 128px when set */
+  iconSize?: "default" | "large";
+}[] = [
+  { iconSrc: "/images/USA.svg", label: "Made in USA" },
+  { iconSrc: "/images/warranty.svg", label: "Commercial warranty" },
+  { iconSrc: "/images/Shipping.svg", label: "Fast shipping", iconSize: "large" },
+  { iconSrc: "/images/rating.svg", label: "Average rating" },
+];
+
+function TrustBar({ variant = "standalone" }: { variant?: "standalone" | "inHero" }) {
   return (
-    <div className="bg-[#111111] border-t border-b border-[#2B2B2B]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-[#2B2B2B]">
-          {(
-            [
-              { Icon: IconTruck, label: "Free Shipping", sub: "On qualifying orders" },
-              { Icon: IconLockClosed, label: "Secure Checkout", sub: "SSL encrypted" },
-              { Icon: IconArrowUturnLeft, label: "Easy Returns", sub: "Hassle-free process" },
-              { Icon: IconPhone, label: "1-800-423-0698", sub: "Mon–Fri, 8am–5pm CT" },
-            ] as const
-          ).map(({ Icon, label, sub }) => (
-            <div key={label} className="flex items-center gap-3 py-3 sm:py-2 sm:px-6 first:pl-0">
-              <Icon className="w-7 h-7 shrink-0 text-[#D52324]" aria-hidden />
-              <div>
-                <p className="text-sm font-heading font-bold text-white tracking-wide uppercase">
+    <div
+      className={
+        variant === "inHero"
+          ? "mt-auto w-full border-t border-[#2B2B2B] bg-[#111111]"
+          : "border-t border-b border-[#2B2B2B] bg-[#111111]"
+      }
+    >
+      <div className="mx-auto max-w-7xl px-3 py-2.5 sm:px-5 sm:py-3 lg:px-7 lg:py-3">
+        <div className="grid grid-cols-2 gap-2 divide-y divide-[#2B2B2B] sm:gap-0 sm:divide-y-0 sm:divide-x lg:grid-cols-4">
+          {TRUST_BAR_ITEMS.map(({ iconSrc, label, sub, iconSize = "default" }) => {
+            const isLarge = iconSize === "large";
+            return (
+            <div
+              key={label}
+              className="flex min-w-0 flex-col items-center justify-center gap-1.5 py-2.5 text-center sm:gap-1.5 sm:px-2 sm:py-2 md:px-3"
+            >
+              <img
+                src={iconSrc}
+                alt=""
+                width={isLarge ? 80 : 64}
+                height={isLarge ? 80 : 64}
+                className={`shrink-0 ${isLarge ? "h-20 w-20" : "h-16 w-16"}`}
+                decoding="async"
+              />
+              <div className="min-w-0 w-full max-w-none px-0.5 text-center">
+                <p className="whitespace-nowrap text-[10px] font-heading font-bold uppercase leading-none tracking-wide text-white sm:text-xs">
                   {label}
                 </p>
-                <p className="text-xs text-[#6B6B6B] mt-0.5">{sub}</p>
+                {sub && <p className="mt-0.5 text-xs text-[#6B6B6B]">{sub}</p>}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
@@ -487,7 +511,6 @@ export default async function HomePage() {
   return (
     <>
       <Hero />
-      <TrustBar />
       <CategoryCards />
       <FeaturedProduct />
       <NothingBeatsCallout />

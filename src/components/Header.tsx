@@ -215,7 +215,7 @@ export default function Header() {
         <div className="glass-header-layer">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Logo row */}
-          <div className="relative flex min-h-[5rem] items-center justify-center py-2.5 sm:min-h-[5.25rem] sm:py-3">
+          <div className="relative flex min-h-[5.75rem] items-center justify-center py-2.5 sm:min-h-24 sm:py-3">
             <button
               type="button"
               onClick={() => setMobileOpen(!mobileOpen)}
@@ -235,8 +235,8 @@ export default function Header() {
             <Link href="/" className="group px-2" aria-label="Cookshack — Home">
               <CookshackLogoLockup
                 interactive
-                wordmarkClassName="h-12 max-w-[min(100%,20rem)] sm:h-14"
-                taglineClassName="font-heading font-bold uppercase leading-none text-[0.52rem] tracking-[0.22em] text-[#D52324]"
+                wordmarkClassName="h-16 max-w-[min(100%,24rem)] sm:h-20"
+                taglineClassName="inline-block translate-x-6 font-heading font-bold uppercase leading-none text-[0.6rem] tracking-[0.22em] text-[#D52324] sm:translate-x-10"
               />
             </Link>
           </div>
