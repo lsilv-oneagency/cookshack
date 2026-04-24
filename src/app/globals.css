@@ -120,4 +120,107 @@
   .shop-cat-shine-anim {
     animation: shop-cat-shine 0.95s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
   }
+
+  /* Home — “As seen in” press row (infinite scroll; pause when reduced motion) */
+  @keyframes as-seen-in-marquee {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+  .as-seen-in-marquee-wrap {
+    display: block;
+    overflow: hidden;
+    /* Edge fade: content softens at left / right (matches #0a0a0a bar) */
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent 0,
+      #fff 2.5rem,
+      #fff calc(100% - 2.5rem),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      90deg,
+      transparent 0,
+      #fff 2.5rem,
+      #fff calc(100% - 2.5rem),
+      transparent 100%
+    );
+  }
+  @media (min-width: 640px) {
+    .as-seen-in-marquee-wrap {
+      -webkit-mask-image: linear-gradient(
+        90deg,
+        transparent 0,
+        #fff 3.5rem,
+        #fff calc(100% - 3.5rem),
+        transparent 100%
+      );
+      mask-image: linear-gradient(
+        90deg,
+        transparent 0,
+        #fff 3.5rem,
+        #fff calc(100% - 3.5rem),
+        transparent 100%
+      );
+    }
+  }
+  .as-seen-in-marquee-track {
+    display: flex;
+    width: max-content;
+    min-height: 2.75rem;
+    align-items: center;
+    animation: as-seen-in-marquee 50s linear infinite;
+  }
+  .as-seen-in-static {
+    display: none;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem 0.75rem;
+    text-align: center;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent 0,
+      #fff 2.5rem,
+      #fff calc(100% - 2.5rem),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      90deg,
+      transparent 0,
+      #fff 2.5rem,
+      #fff calc(100% - 2.5rem),
+      transparent 100%
+    );
+  }
+  @media (min-width: 640px) {
+    .as-seen-in-static {
+      -webkit-mask-image: linear-gradient(
+        90deg,
+        transparent 0,
+        #fff 3.5rem,
+        #fff calc(100% - 3.5rem),
+        transparent 100%
+      );
+      mask-image: linear-gradient(
+        90deg,
+        transparent 0,
+        #fff 3.5rem,
+        #fff calc(100% - 3.5rem),
+        transparent 100%
+      );
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .as-seen-in-marquee-wrap {
+      display: none !important;
+    }
+    .as-seen-in-static {
+      display: flex !important;
+    }
+  }
 }

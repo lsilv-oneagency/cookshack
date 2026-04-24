@@ -6,6 +6,7 @@ import { filterStorefrontProducts } from "@/lib/miva-storefront-visibility";
 import BrowseProductsWithFilters from "@/components/BrowseProductsWithFilters";
 import ProductImage from "@/components/ProductImage";
 import NothingBeatsCallout from "@/components/NothingBeatsCallout";
+import AsSeenInPress from "@/components/AsSeenInPress";
 import ShopCategoryStrip from "@/components/ShopCategoryStrip";
 import HeroBackground from "@/components/HeroBackground";
 import type { Metadata } from "next";
@@ -574,6 +575,7 @@ export default async function HomePage() {
     <>
       <Hero />
       <CategoryCards />
+      <AsSeenInPress />
       <FeaturedProduct />
       <NothingBeatsCallout />
       <BrowseProducts />
