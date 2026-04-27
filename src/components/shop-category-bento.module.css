@@ -311,6 +311,28 @@
     grid-column: span 1;
     min-height: 220px;
   }
+  /* Full-width bottom row (pizza / wide tile) — same as desktop intent */
+  .bento > li:nth-child(8) {
+    grid-column: 1 / -1;
+  }
+  /*
+   * Mobile WebKit: entrance animation often never completes for tiles that were display:none
+   * (“Show more”); scaled bg inside overflow:hidden can paint as empty. Flatten anim + bg transform.
+   */
+  .bento > li:nth-child(n) .card {
+    min-height: 220px;
+    height: auto;
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  .bento .cardBg,
+  .bento .card:hover .cardBg,
+  .bento .card:focus-visible .cardBg {
+    transform: none;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
   /*
    * Desktop enlarges tiles 1 & 7 only; on a uniform 2-col grid every card is the same role,
    * so override that emphasis — one title scale for all (smaller than desktop for narrow tiles).
