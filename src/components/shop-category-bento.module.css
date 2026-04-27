@@ -2,6 +2,7 @@
 
 .bento {
   --gap: 10px;
+  --bento-row-height: 320px;
   --bg-scrim: #0e0e0e;
   --card: #161616;
   /* Brand red — solid edges / rules, not diffuse outer glows */
@@ -11,12 +12,12 @@
   --text-muted: #9a9a9a;
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  grid-template-rows: 200px 200px 200px;
+  grid-template-rows: var(--bento-row-height) var(--bento-row-height) var(--bento-row-height);
   gap: var(--gap);
   width: 100%;
 }
 
-/* Grid items are <li> (link is inside) — same cell spans as the reference. */
+/* Grid items are <li> (link is inside) — desktop: seven tiles (8th is mobile-only, hidden ≥701px). */
 /* Row 1: 7 + 5 */
 .bento > li:nth-child(1) {
   grid-column: 1 / span 7;
@@ -42,6 +43,12 @@
 }
 .bento > li:nth-child(7) {
   grid-column: 6 / span 7;
+}
+
+@media (min-width: 701px) {
+  .bentoMobileOnly {
+    display: none !important;
+  }
 }
 
 /* --- card link fills grid cell --- */
@@ -86,11 +93,16 @@
   position: absolute;
   inset: 0;
   background-size: cover;
-  background-position: center;
+  background-position: left top;
   opacity: 1;
   transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   transform: scale(1.06);
   pointer-events: none;
+}
+
+/* Per-tile override — wide product photography reads better centered */
+.cardBgCenter {
+  background-position: center center;
 }
 
 /* Bottom-weighted scrim: keep upper card atmospheric; darken only where the type sits */
@@ -270,6 +282,9 @@
 .bento > li:nth-child(7) .card {
   animation-delay: 0.3s;
 }
+.bento > li:nth-child(8) .card {
+  animation-delay: 0.35s;
+}
 
 @keyframes cardIn {
   to {
@@ -280,18 +295,22 @@
 
 @media (max-width: 700px) {
   .bento {
+    --mobile-bento-gap: 8px;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: auto;
+    gap: var(--mobile-bento-gap);
   }
   .bento > li:nth-child(n) {
     grid-column: span 1;
-    min-height: 150px;
+    min-height: 220px;
   }
-  .bento > li:nth-child(1) {
-    grid-column: span 2;
-  }
-  .bento > li:nth-child(7) {
-    grid-column: span 2;
+  /*
+   * Desktop enlarges tiles 1 & 7 only; on a uniform 2-col grid every card is the same role,
+   * so override that emphasis — one title scale for all.
+   */
+  .bento > li:nth-child(n) .title {
+    font-size: 22px;
+    letter-spacing: 0.05em;
   }
 }
 

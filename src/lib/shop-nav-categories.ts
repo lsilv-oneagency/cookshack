@@ -41,7 +41,7 @@ export const SHOP_NAV_CATEGORIES: ShopNavCategory[] = [
     kicker: "Add-Ons",
     href: "/category/ctgy_equipment_accessories",
     categoryCode: "ctgy_equipment_accessories",
-    stripImage: "/images/commercial.png",
+    stripImage: "/images/category-equipment-accessories.png",
   },
   {
     label: "Sauces and Spices",
@@ -49,21 +49,21 @@ export const SHOP_NAV_CATEGORIES: ShopNavCategory[] = [
     kicker: "Rubs & Marinades",
     href: "/category/ctgy_sauces_and_spices",
     categoryCode: "ctgy_sauces_and_spices",
-    stripImage: "/images/home.png",
+    stripImage: "/images/category-sauces-spices.png",
   },
   {
     label: "Cookbooks",
     kicker: "Recipes & Guides",
     href: "/category/ctgy_cookbooks",
     categoryCode: "ctgy_cookbooks",
-    stripImage: "/images/catalog-hero-bg.png",
+    stripImage: "/images/category-cookbooks.png",
   },
   {
     label: "Replacement Parts",
     kicker: "OEM Components",
     href: "/category/ctgy_replacement_parts",
     categoryCode: "ctgy_replacement_parts",
-    stripImage: "/images/hero.png",
+    stripImage: "/images/category-replacement-parts.png",
   },
   {
     label: "Wood and Pellets",
@@ -71,7 +71,7 @@ export const SHOP_NAV_CATEGORIES: ShopNavCategory[] = [
     kicker: "Smoking Fuel",
     href: "/category/ctgy_wood_and_pellets",
     categoryCode: "ctgy_wood_and_pellets",
-    stripImage: "/images/why-cookshack-bg.png",
+    stripImage: "/images/category-wood-pellets.png",
   },
 ];
 

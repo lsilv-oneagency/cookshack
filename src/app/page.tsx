@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getProducts, getCategoryProducts } from "@/lib/miva-client";
+import { getProducts, getCategoryProducts, getProductByCode } from "@/lib/miva-client";
+import { getPrimaryProductImagePath } from "@/lib/miva-product-images";
 import { filterStorefrontProducts } from "@/lib/miva-storefront-visibility";
 import BrowseProductsWithFilters from "@/components/BrowseProductsWithFilters";
 import ProductImage from "@/components/ProductImage";
@@ -66,7 +67,7 @@ function Hero() {
               <span className="block text-5xl tracking-wider sm:text-6xl lg:text-7xl">Legendary Smoke</span>
               <span className="block text-5xl tracking-wider sm:text-6xl lg:text-7xl">Professional Grade</span>
             </h1>
-            <p className="mx-auto mb-8 max-w-2xl font-body text-base leading-relaxed text-[#9A9A9A] sm:text-lg">
+            <p className="mx-auto mb-8 max-w-2xl font-body text-base leading-relaxed text-white sm:text-lg">
               Handcrafted smokers and grills built for high-volume restaurants and ultimate backyard
               pitmasters.
             </p>
@@ -95,14 +96,13 @@ function Hero() {
   );
 }
 
-// ── Full-width shop split: commercial | residential ────────────────────────
+// ── Full-width shop split: commercial | residential (editorial art — not catalog SKUs) ──
 const SHOP_SPLIT_COLUMNS = [
   {
     eyebrow: "For restaurants & pros",
     title: "Pro-Grade Grills & Smokers",
     subhead:
       "Built for restaurants, caterers, and pitmasters who demand consistency. Six decades of proof.",
-    stat: "120–750 lb capacity | NSF / USDA certified | Net 30 financing",
     cta: "Request a quote",
     href: "/commercial-inquiries",
     image: "/images/shop-commercial.png",
@@ -112,7 +112,6 @@ const SHOP_SPLIT_COLUMNS = [
     eyebrow: "For the backyard",
     title: "Home Grills & Smokers",
     subhead: "Commercial-grade quality, sized for the backyard that takes barbecue seriously.",
-    stat: "Electric, pellet & pizza ovens | From $1,285 | Affirm financing",
     cta: "Shop residential",
     href: "/residential",
     image: "/images/shop-residential.png",
@@ -150,9 +149,6 @@ function CategoryCards() {
               <p className="mt-3 max-w-md text-sm leading-relaxed text-white/90 sm:text-base">
                 {col.subhead}
               </p>
-              <p className="mt-4 max-w-lg text-[9px] font-heading font-bold uppercase leading-snug tracking-[0.12em] text-white/80 sm:text-[10px] sm:tracking-[0.14em]">
-                {col.stat}
-              </p>
               <span className="mt-6 inline-flex items-center gap-2 text-[#D52324] font-heading text-sm font-bold uppercase tracking-widest transition-all group-hover:gap-3">
                 {col.cta}
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -167,9 +163,8 @@ function CategoryCards() {
   );
 }
 
-/** Home featured spotlight copy — not driven by the Miva API (links + image use the same `productCode` as the PDP). */
+/** Featured SKU + editorial fallback when the catalog is unavailable. */
 const HOME_FEATURED_SPOTLIGHT = {
-  /** Must match a live Miva `product.code` so `/shop/{code}` and `mm5/graphics/00000001/1/{code}.(png|jpg)` resolve. */
   productCode: "SM025",
   eyebrow: "Featured product",
   title: "Smokette Elite, SS with digital controller and meat probe",
@@ -179,9 +174,31 @@ const HOME_FEATURED_SPOTLIGHT = {
   imageAlt: "Cookshack Smokette Elite electric smoker, stainless with digital control",
 } as const;
 
-function FeaturedProduct() {
-  const { productCode, eyebrow, title, price, description, imageAlt } = HOME_FEATURED_SPOTLIGHT;
-  const shopPath = `/shop/${encodeURIComponent(productCode)}`;
+function stripHtmlForTeaser(html: string): string {
+  return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+async function FeaturedProduct() {
+  const fb = HOME_FEATURED_SPOTLIGHT;
+  let product: MivaProduct | null = null;
+  try {
+    const res = await getProductByCode(fb.productCode);
+    if (res.data?.code) product = res.data;
+  } catch {
+    // use fallback copy + graphics fallback in ProductImage
+  }
+
+  const code = product?.code ?? fb.productCode;
+  const shopPath = `/shop/${encodeURIComponent(code)}`;
+  const title = product?.name ?? fb.title;
+  const price = product?.formatted_price ?? fb.price;
+  const fromApi = product?.descrip ? stripHtmlForTeaser(product.descrip) : "";
+  const description =
+    fromApi.length >= 40
+      ? `${fromApi.slice(0, 280).trim()}${fromApi.length > 280 ? "…" : ""}`
+      : fb.description;
+  const imageAlt = product?.name ?? fb.imageAlt;
+  const rawImg = product ? getPrimaryProductImagePath(product) : "";
 
   return (
     <section className="relative overflow-hidden bg-white">
@@ -190,7 +207,7 @@ function FeaturedProduct() {
           <div>
             <span className="inline-flex items-center gap-2 text-[#D52324] text-[10px] font-heading font-bold tracking-[0.25em] uppercase mb-4">
               <IconFlame className="w-4 h-4 shrink-0 text-[#D52324]" aria-hidden />
-              {eyebrow}
+              {fb.eyebrow}
             </span>
             <h2 className="font-heading font-extrabold text-[#1A1A1A] text-3xl sm:text-4xl lg:text-5xl tracking-wider uppercase leading-tight mb-3">
               {title}
@@ -209,8 +226,10 @@ function FeaturedProduct() {
           </div>
           <div className="relative h-72 w-full overflow-hidden rounded-xl border border-[#E8E0D8] bg-white md:h-96">
             <ProductImage
+              src={rawImg || undefined}
               alt={imageAlt}
-              productCode={productCode}
+              productCode={code}
+              productSku={product?.sku}
               productName={title}
               fill
               className="object-contain bg-white p-6 md:p-8"

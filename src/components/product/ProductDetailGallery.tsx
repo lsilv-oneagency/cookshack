@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import ProductImage from "@/components/ProductImage";
 
 type ProductDetailGalleryProps = {
@@ -60,13 +59,16 @@ export default function ProductDetailGallery({
               aria-label={`View image ${i + 1} of ${list.length}`}
               aria-current={i === safeIndex ? "true" : undefined}
             >
-              <Image
+              {/* Same `ProductImage` chain as main (API path → code.png/jpg) so thumbs don’t break when a path 404s */}
+              <ProductImage
                 src={img}
                 alt=""
+                productCode={productCode}
+                productSku={productSku}
+                productName={productName}
                 fill
                 className="object-contain p-1.5"
                 sizes="80px"
-                unoptimized
               />
             </button>
           ))}
