@@ -103,9 +103,6 @@ export default function BrowseProductsWithFilters({ allProducts }: Props) {
               Browse Products
             </h2>
             <div className="mt-3 h-1 w-16 bg-[#D52324]" />
-            <p className="mt-3 font-body text-sm text-[#6B6B6B]">
-              Discover Cookshack&apos;s industry-leading smokers, wood-fired ovens, and premium fuels.
-            </p>
           </div>
           <Link
             href="/shop"

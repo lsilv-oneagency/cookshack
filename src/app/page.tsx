@@ -4,6 +4,7 @@ import { getProducts, getCategoryProducts, getProductByCode } from "@/lib/miva-c
 import { getPrimaryProductImagePath } from "@/lib/miva-product-images";
 import { filterStorefrontProducts } from "@/lib/miva-storefront-visibility";
 import BrowseProductsWithFilters from "@/components/BrowseProductsWithFilters";
+import TopProductsHomeSection from "@/components/TopProductsHomeSection";
 import ProductImage from "@/components/ProductImage";
 import NothingBeatsCallout from "@/components/NothingBeatsCallout";
 import AsSeenInPress from "@/components/AsSeenInPress";
@@ -209,7 +210,7 @@ async function FeaturedProduct() {
               <IconFlame className="w-4 h-4 shrink-0 text-[#D52324]" aria-hidden />
               {fb.eyebrow}
             </span>
-            <h2 className="font-heading font-extrabold text-[#1A1A1A] text-3xl sm:text-4xl lg:text-5xl tracking-wider uppercase leading-tight mb-3">
+            <h2 className="font-heading font-extrabold text-[#1A1A1A] text-2xl sm:text-3xl lg:text-4xl tracking-wide normal-case leading-tight mb-3">
               {title}
             </h2>
             <p className="font-heading font-extrabold text-2xl text-[#D52324] mb-4">{price}</p>
@@ -319,40 +320,50 @@ function WhyCookshack() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-14">
           <h2 className="font-heading font-extrabold text-4xl sm:text-5xl text-white tracking-wider uppercase">
-            Why Cookshack?
+            Why Cookshack
           </h2>
           <div className="w-16 h-1 bg-[#D52324] mx-auto mt-3" />
+          <p className="mx-auto mt-5 max-w-2xl font-body text-base leading-relaxed text-[#9A9A9A] sm:text-lg">
+            Four things we&apos;ve been doing since 1962.
+          </p>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {(
             [
               {
-                Icon: IconFlame,
-                title: "Legendary Smoke Flavor",
-                desc: "Engineered to deliver the same authentic, slow-smoked taste every single time — whether it's your first cook or your thousandth.",
+                Icon: IconCog,
+                kicker: "Pillar 1 — Manufacturing",
+                title: "Made in Oklahoma since 1962",
+                desc: "Every Cookshack starts as 304 stainless steel at our Ponca City factory. No outsourcing. No overseas. Same family building it now that started it in 1962.",
               },
               {
-                Icon: IconCog,
-                title: "Built to Last",
-                desc: "Commercial-grade stainless steel construction designed to run shift after shift, year after year without missing a beat.",
+                Icon: IconFlame,
+                kicker: "Pillar 2 — Build",
+                title: "Built to last decades",
+                desc: "Commercial-grade stainless construction designed to run shift after shift, year after year. The average Cookshack owner has had theirs for 14+ years. Many are on year 20 and still cooking weekly.",
               },
               {
                 Icon: IconTrophy,
-                title: "Competition Proven",
-                desc: "From backyard BBQ championships to Michelin-starred restaurants, Cookshack is the choice of champions.",
+                kicker: "Pillar 3 — Fast Eddy",
+                title: "Designed with a world champion",
+                desc: 'Ed "Fast Eddy" Maurin — retired Kansas City firefighter, decorated competition pitmaster — designed the FEC100 in 1997. He\'s been our partner ever since.',
               },
               {
                 Icon: IconUserGroup,
-                title: "Expert Support",
-                desc: "Our BBQ experts are available by phone, Mon–Fri. Real people who know these machines inside and out.",
+                kicker: "Pillar 4 — Third-party proof",
+                title: "The gold standard",
+                desc: '"The gold standard for electric smokers." — AmazingRibs.com. The most authoritative independent BBQ review site calling it like it is.',
               },
             ] as const
-          ).map(({ Icon, title, desc }) => (
+          ).map(({ Icon, kicker, title, desc }) => (
             <div
               key={title}
               className="glass-why-card rounded-lg p-6 transition duration-300 hover:border-[#D52324] group"
             >
               <Icon className="w-10 h-10 text-[#D52324] mb-4" aria-hidden />
+              <p className="text-[10px] font-heading font-bold uppercase tracking-[0.12em] text-[#D52324] sm:text-xs mb-2">
+                {kicker}
+              </p>
               <h3 className="font-heading font-bold text-white text-lg tracking-wide uppercase mb-2 group-hover:text-[#D52324] transition">
                 {title}
               </h3>
@@ -496,6 +507,7 @@ export default async function HomePage() {
       <CategoryCards />
       <AsSeenInPress />
       <FeaturedProduct />
+      <TopProductsHomeSection />
       <NothingBeatsCallout />
       <BrowseProducts />
       <ShopCategoryStrip />

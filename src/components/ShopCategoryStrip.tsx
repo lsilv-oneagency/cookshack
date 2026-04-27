@@ -100,8 +100,8 @@ export default function ShopCategoryStrip() {
             Shop Our Categories
           </h2>
           <div className="mx-auto mt-3 h-1 w-16 bg-[#D52324]" aria-hidden />
-          <p className="mx-auto mt-5 max-w-2xl font-body text-base leading-relaxed text-[#9A9A9A] sm:text-lg">
-            Everything you need to smoke, grill, and serve — from backyard to commercial kitchen.
+          <p className="mx-auto mt-5 max-w-2xl text-balance font-body text-base leading-relaxed text-[#9A9A9A] sm:text-lg">
+            Everything you need to smoke, grill, and serve — from backyard to commercial&nbsp;kitchen.
           </p>
         </header>
         <ul className={`${styles.bento} m-0 list-none p-0`}>

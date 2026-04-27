@@ -42,6 +42,8 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   /** Which nav label has the mega menu open (desktop). */
   const [megaLabel, setMegaLabel] = useState<string | null>(null);
+  /** Desktop: full category list under “All Categories”. */
+  const [allCategoriesOpen, setAllCategoriesOpen] = useState(false);
   const [megaLoading, setMegaLoading] = useState(false);
   const [megaProducts, setMegaProducts] = useState<MivaProduct[]>([]);
   const [megaError, setMegaError] = useState<string | null>(null);
@@ -82,6 +84,7 @@ export default function Header() {
   useEffect(() => {
     setMobileOpen(false);
     setMegaLabel(null);
+    setAllCategoriesOpen(false);
     setMegaProducts([]);
     setMegaLoading(false);
     setMegaError(null);
@@ -164,11 +167,15 @@ export default function Header() {
       clearTimeout(megaCloseTimerRef.current);
       megaCloseTimerRef.current = null;
     }
+    setAllCategoriesOpen(false);
     setMegaLabel(label);
   };
 
   const scheduleCloseMega = () => {
-    megaCloseTimerRef.current = setTimeout(() => setMegaLabel(null), 200);
+    megaCloseTimerRef.current = setTimeout(() => {
+      setMegaLabel(null);
+      setAllCategoriesOpen(false);
+    }, 200);
   };
 
   const cancelCloseMega = () => {
@@ -392,7 +399,10 @@ export default function Header() {
                     onMouseEnter={() => {
                       cancelCloseMega();
                       if (hasMega) openMega(item.label);
-                      else setMegaLabel(null);
+                      else {
+                        setMegaLabel(null);
+                        setAllCategoriesOpen(false);
+                      }
                     }}
                   >
                     <Link
@@ -429,8 +439,70 @@ export default function Header() {
                   </li>
                 );
               })}
+              <li
+                className="relative flex shrink-0"
+                onMouseEnter={() => {
+                  cancelCloseMega();
+                  setMegaLabel(null);
+                  setAllCategoriesOpen(true);
+                }}
+              >
+                <Link
+                  href="/shop"
+                  aria-expanded={allCategoriesOpen}
+                  aria-haspopup="true"
+                  className={`inline-flex min-h-[40px] shrink-0 items-center gap-2 px-1.5 py-2 font-heading text-sm font-bold uppercase tracking-widest text-white underline-offset-2 transition hover:underline sm:min-h-[44px] sm:px-2.5 lg:px-3 ${
+                    (pathname.split("?")[0]?.replace(/\/$/, "") ?? "") === "/shop" ? "underline" : ""
+                  } ${allCategoriesOpen ? "underline" : ""}`}
+                >
+                  <span className="whitespace-nowrap">All Categories</span>
+                  <svg
+                    className={`h-4 w-4 shrink-0 transition-transform ${allCategoriesOpen ? "rotate-90" : ""}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </Link>
+              </li>
             </ul>
           </nav>
+
+          {allCategoriesOpen && (
+            <div
+              className="absolute left-0 right-0 top-full z-[200] border-b border-neutral-200 border-t border-neutral-200 bg-white shadow-[0_12px_32px_rgba(0,0,0,0.12)]"
+              role="region"
+              aria-label="All categories"
+              onMouseEnter={cancelCloseMega}
+            >
+              <div className="mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-5 lg:px-8">
+                <p className="mb-3 border-b border-neutral-100 pb-3 text-[10px] font-heading font-bold uppercase tracking-widest text-[#9A9A9A] sm:text-xs">
+                  All categories
+                </p>
+                <ul className="m-0 grid list-none grid-cols-1 gap-0.5 p-0 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {SHOP_NAV_CATEGORIES.map((cat) => {
+                    const CategoryIcon = megamenuIconForCategory(cat.categoryCode);
+                    const title = cat.cardTitle ?? cat.label;
+                    return (
+                      <li key={cat.categoryCode} className="min-w-0">
+                        <Link
+                          href={cat.href}
+                          className="flex min-w-0 items-center gap-2 rounded-md px-2 py-2 text-left text-[11px] font-heading font-semibold uppercase leading-snug tracking-wide text-[#1A1A1A] transition hover:bg-neutral-50 hover:text-[#D52324] sm:gap-2.5 sm:px-3 sm:text-xs"
+                        >
+                          {CategoryIcon ? (
+                            <CategoryIcon className="h-4 w-4 shrink-0 text-[#D52324] sm:h-[18px] sm:w-[18px]" aria-hidden />
+                          ) : null}
+                          <span className="min-w-0">{title}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </div>
+          )}
 
           {megaLabel && activeMegaItem?.categoryCode && (
             <div
