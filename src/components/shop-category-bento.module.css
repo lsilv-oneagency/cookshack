@@ -313,11 +313,11 @@
   }
   /*
    * Desktop enlarges tiles 1 & 7 only; on a uniform 2-col grid every card is the same role,
-   * so override that emphasis — one title scale for all.
+   * so override that emphasis — one title scale for all (smaller than desktop for narrow tiles).
    */
   .bento > li:nth-child(n) .title {
-    font-size: 22px;
-    letter-spacing: 0.05em;
+    font-size: 16px;
+    letter-spacing: 0.04em;
   }
 }
 
