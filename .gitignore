@@ -39,7 +39,6 @@ yarn-error.log*
 # env files — default ignore; exceptions below are tracked on purpose.
 .env*
 !.env.example
-!.env.local
 
 # vercel
 .vercel

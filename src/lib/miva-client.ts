@@ -237,41 +237,10 @@ export function isProductInRecipesCategory(p: MivaProduct): boolean {
   return (p.categories ?? []).some((c) => c.code?.toLowerCase() === want);
 }
 
-/** Recipe editorial page: same category as homepage picks, or legacy non-purchasable content SKUs. */
+/** Recipe editorial page: recipes category in Miva, or legacy non-purchasable content SKUs. */
 export function canViewAsRecipeContentPage(p: MivaProduct): boolean {
   if (isProductInRecipesCategory(p)) return true;
   return isNonPurchasableStorefrontProduct(p);
-}
-
-export type HomeRecipePickResult = {
-  products: MivaProduct[];
-  totalInCategory: number;
-};
-
-/**
- * First `limit` active products in the recipes category, by display order — for homepage editorial.
- */
-export async function getRecipeProductsForHome(limit: number = 3): Promise<HomeRecipePickResult> {
-  const categoryCode = getRecipesCategoryCode();
-  if (!categoryCode) {
-    return { products: [], totalInCategory: 0 };
-  }
-  const safeLimit = Math.max(1, Math.min(limit, 24));
-  try {
-    const res = await getCategoryProducts(categoryCode, {
-      count: safeLimit,
-      offset: 0,
-      sort: "disp_order",
-    });
-    const rows = res.data ?? [];
-    const total = typeof res.total_count === "number" ? res.total_count : rows.length;
-    return {
-      products: rows.slice(0, limit),
-      totalInCategory: total,
-    };
-  } catch {
-    return { products: [], totalInCategory: 0 };
-  }
 }
 
 const CATEGORY_PRODUCT_PAGE_SIZE = 100;
