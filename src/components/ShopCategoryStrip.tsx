@@ -5,7 +5,8 @@ import Link from "next/link";
 import { SHOP_NAV_CATEGORIES } from "@/lib/shop-nav-categories";
 import styles from "./shop-category-bento.module.css";
 
-const INITIAL_VISIBLE = 5;
+/** Narrow screens only — first N tiles before “Show more” (desktop always shows all). Match bento `@media (max-width: 700px)`. */
+const INITIAL_MOBILE_VISIBLE = 6;
 
 /** Bento tiles that use `stripImage` from `SHOP_NAV_CATEGORIES`; others keep shared art. */
 const BENTO_CUSTOM_BG_CODES = new Set([
@@ -74,8 +75,7 @@ const ICONS = [
 export default function ShopCategoryStrip() {
   const [showAll, setShowAll] = useState(false);
   const total = SHOP_NAV_CATEGORIES.length;
-  const canLoadMore = total > INITIAL_VISIBLE;
-  const visible = showAll || !canLoadMore ? SHOP_NAV_CATEGORIES : SHOP_NAV_CATEGORIES.slice(0, INITIAL_VISIBLE);
+  const canExpandMobile = total > INITIAL_MOBILE_VISIBLE;
 
   return (
     <section
@@ -95,18 +95,19 @@ export default function ShopCategoryStrip() {
             Everything you need to smoke, grill, and serve — from backyard to commercial&nbsp;kitchen.
           </p>
         </header>
-        <ul
-          id="shop-category-bento-list"
-          className={`${styles.bento} m-0 list-none p-0${showAll || !canLoadMore ? "" : ` ${styles.bentoPreview}`}`}
-        >
-          {visible.map((cat) => {
-            const i = SHOP_NAV_CATEGORIES.findIndex((c) => c.categoryCode === cat.categoryCode);
+        <ul id="shop-category-bento-list" className={`${styles.bento} m-0 list-none p-0`}>
+          {SHOP_NAV_CATEGORIES.map((cat, i) => {
             const mainLine = cat.cardTitle ?? cat.label;
             const bgUrl = BENTO_CUSTOM_BG_CODES.has(cat.categoryCode)
               ? cat.stripImage
               : CATEGORY_BENTO_BG_DEFAULT;
+            const collapsedMobile =
+              canExpandMobile && !showAll && i >= INITIAL_MOBILE_VISIBLE;
             return (
-              <li key={cat.href} className="min-w-0 p-0">
+              <li
+                key={cat.href}
+                className={`min-w-0 p-0${collapsedMobile ? " max-[700px]:hidden" : ""}`}
+              >
                 <Link href={cat.href} className={styles.card}>
                   <div
                     className={`${styles.cardBg}${
@@ -134,15 +135,16 @@ export default function ShopCategoryStrip() {
             );
           })}
         </ul>
-        {canLoadMore ? (
-          <div className="mt-8 flex justify-center sm:mt-10">
+        {canExpandMobile ? (
+          <div className="mt-8 flex justify-center sm:mt-10 min-[701px]:hidden">
             <button
               type="button"
               className="font-heading border border-white/25 bg-transparent px-8 py-3 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:border-[#D52324] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D52324]"
               onClick={() => setShowAll((v) => !v)}
               aria-controls="shop-category-bento-list"
+              aria-expanded={showAll}
             >
-              {showAll ? "Show less" : "Load more"}
+              {showAll ? "Show less" : "Show more"}
             </button>
           </div>
         ) : null}

@@ -49,14 +49,14 @@ export default function TopProductsHomeClient({ items }: Props) {
 }
 
 function TopProductCard({ item }: { item: TopProductCardData }) {
-  const { addItem, isLoading } = useCart();
+  const { addItem } = useCart();
   const [adding, setAdding] = useState(false);
   const shopHref = `/shop/${encodeURIComponent(item.code)}`;
 
   const handleAdd = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (adding || isLoading || !item.inStock) return;
+    if (adding || !item.inStock) return;
     setAdding(true);
     try {
       await addItem({
@@ -112,7 +112,7 @@ function TopProductCard({ item }: { item: TopProductCardData }) {
         <button
           type="button"
           onClick={handleAdd}
-          disabled={adding || isLoading || !item.inStock}
+          disabled={adding || !item.inStock}
           className="mt-0.5 flex min-h-[2.25rem] w-full min-w-0 items-center justify-center gap-1 rounded-full bg-[#D52324] px-2 py-1.5 text-[11px] font-bold text-white shadow-sm transition hover:brightness-[0.95] disabled:cursor-not-allowed disabled:opacity-50 sm:mt-1 sm:min-h-[2.5rem] sm:py-2 sm:text-xs"
         >
           {adding ? (

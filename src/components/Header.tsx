@@ -601,9 +601,9 @@ export default function Header() {
         {/* ── Mobile menu ──────────────────────────────────── */}
         {mobileOpen && (
           <div className="glass-header-layer border-t border-white/[0.14] border-b border-white/[0.16] md:hidden">
-            <nav className="py-2" aria-label="Mobile menu">
+            <nav className="py-2 text-left" aria-label="Mobile menu">
               <div className="border-b border-[#2B2B2B] px-5 pb-3">
-                <p className="text-[10px] font-heading font-bold uppercase tracking-widest text-[#6B6B6B] mb-2">
+                <p className="mb-2 text-[10px] font-heading font-bold uppercase tracking-widest text-[#6B6B6B]">
                   Service
                 </p>
                 <ul className="space-y-2 text-sm text-[#CCCCCC]">
@@ -632,14 +632,14 @@ export default function Header() {
                 <div key={item.label}>
                   <Link
                     href={item.href}
-                    className="flex items-center justify-center text-center px-5 py-3 text-sm font-heading font-semibold tracking-wider uppercase text-[#CCCCCC] hover:text-white hover:bg-[#2B2B2B] transition"
+                    className="flex items-center justify-start px-5 py-3 text-left text-sm font-heading font-semibold tracking-wider uppercase text-[#CCCCCC] transition hover:bg-[#2B2B2B] hover:text-white"
                     onClick={() => setMobileOpen(false)}
                   >
                     {item.label}
                   </Link>
                 </div>
               ))}
-              <div className="mt-2 border-t border-[#2B2B2B] px-5 pb-3 pt-2 flex flex-wrap items-center gap-4 text-xs text-[#9A9A9A]">
+              <div className="mt-2 flex flex-wrap items-center justify-start gap-4 border-t border-[#2B2B2B] px-5 pb-3 pt-2 text-xs text-[#9A9A9A]">
                 <a href="tel:18004230698" className="inline-flex items-center gap-1.5 font-medium transition hover:text-white">
                   <IconPhone className="h-3.5 w-3.5 shrink-0 text-[#D52324]" aria-hidden />
                   1-800-423-0698

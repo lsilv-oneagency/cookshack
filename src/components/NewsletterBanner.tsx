@@ -25,7 +25,7 @@ export default function NewsletterBanner() {
 
   return (
     <section
-      className="relative z-10 isolate w-full overflow-hidden border-t border-black/15 bg-[#1A1A1A]"
+      className="relative z-10 isolate w-full overflow-visible border-t border-black/15 bg-[#1A1A1A]"
       aria-labelledby="newsletter-banner-heading"
     >
       {/* Height comes from in-flow content below — bg fills that box (short PNG no longer collapses the band on mobile). */}
