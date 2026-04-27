@@ -50,6 +50,13 @@
   grid-column: 1 / -1;
 }
 
+/* First five tiles only — two rows; avoids empty 3rd/4th rows on desktop */
+@media (min-width: 701px) {
+  .bentoPreview {
+    grid-template-rows: var(--bento-row-height) var(--bento-row-height);
+  }
+}
+
 /* --- card link fills grid cell --- */
 .bento > li {
   min-width: 0;
