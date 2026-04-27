@@ -9,6 +9,7 @@ import ProductImage from "@/components/ProductImage";
 import NothingBeatsCallout from "@/components/NothingBeatsCallout";
 import AsSeenInPress from "@/components/AsSeenInPress";
 import ShopCategoryStrip from "@/components/ShopCategoryStrip";
+import FromTheKitchenSection from "@/components/FromTheKitchenSection";
 import HeroBackground from "@/components/HeroBackground";
 import type { Metadata } from "next";
 import type { MivaProduct } from "@/types/miva";
@@ -512,6 +513,7 @@ export default async function HomePage() {
       <BrowseProducts />
       <ShopCategoryStrip />
       <Testimonials />
+      <FromTheKitchenSection />
       <WhyCookshack />
     </>
   );

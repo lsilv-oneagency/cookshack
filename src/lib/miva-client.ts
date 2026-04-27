@@ -226,6 +226,54 @@ export async function getCategoryProducts(
   });
 }
 
+/** Miva category code for recipe/content SKUs (non-storefront PDP). Override if your store uses a different code. */
+export function getRecipesCategoryCode(): string {
+  return (process.env.MIVA_RECIPES_CATEGORY_CODE || "ctgy_recipes").trim();
+}
+
+export function isProductInRecipesCategory(p: MivaProduct): boolean {
+  const want = getRecipesCategoryCode().toLowerCase();
+  if (!want) return false;
+  return (p.categories ?? []).some((c) => c.code?.toLowerCase() === want);
+}
+
+/** Recipe editorial page: same category as homepage picks, or legacy non-purchasable content SKUs. */
+export function canViewAsRecipeContentPage(p: MivaProduct): boolean {
+  if (isProductInRecipesCategory(p)) return true;
+  return isNonPurchasableStorefrontProduct(p);
+}
+
+export type HomeRecipePickResult = {
+  products: MivaProduct[];
+  totalInCategory: number;
+};
+
+/**
+ * First `limit` active products in the recipes category, by display order — for homepage editorial.
+ */
+export async function getRecipeProductsForHome(limit: number = 3): Promise<HomeRecipePickResult> {
+  const categoryCode = getRecipesCategoryCode();
+  if (!categoryCode) {
+    return { products: [], totalInCategory: 0 };
+  }
+  const safeLimit = Math.max(1, Math.min(limit, 24));
+  try {
+    const res = await getCategoryProducts(categoryCode, {
+      count: safeLimit,
+      offset: 0,
+      sort: "disp_order",
+    });
+    const rows = res.data ?? [];
+    const total = typeof res.total_count === "number" ? res.total_count : rows.length;
+    return {
+      products: rows.slice(0, limit),
+      totalInCategory: total,
+    };
+  } catch {
+    return { products: [], totalInCategory: 0 };
+  }
+}
+
 const CATEGORY_PRODUCT_PAGE_SIZE = 100;
 const MAX_CATEGORY_PRODUCTS = 20_000;
 
