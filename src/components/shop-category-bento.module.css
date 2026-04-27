@@ -12,12 +12,13 @@
   --text-muted: #9a9a9a;
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  grid-template-rows: var(--bento-row-height) var(--bento-row-height) var(--bento-row-height);
+  grid-template-rows: var(--bento-row-height) var(--bento-row-height) var(--bento-row-height)
+    var(--bento-row-height);
   gap: var(--gap);
   width: 100%;
 }
 
-/* Grid items are <li> (link is inside) — desktop: seven tiles (8th is mobile-only, hidden ≥701px). */
+/* Grid items are <li> (link is inside) — desktop: seven bento cells + eighth full-width row (Pizza Ovens). */
 /* Row 1: 7 + 5 */
 .bento > li:nth-child(1) {
   grid-column: 1 / span 7;
@@ -45,10 +46,8 @@
   grid-column: 6 / span 7;
 }
 
-@media (min-width: 701px) {
-  .bentoMobileOnly {
-    display: none !important;
-  }
+.bento > li:nth-child(8) {
+  grid-column: 1 / -1;
 }
 
 /* --- card link fills grid cell --- */
@@ -222,9 +221,10 @@
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 2px 12px rgba(0, 0, 0, 0.55);
 }
 
-/* wide row cards — mirror symmetry (first and last bento cell) */
+/* wide row cards — mirror symmetry (first and last bento cell) + full-width Pizza row */
 .bento > li:nth-child(1) .title,
-.bento > li:nth-child(7) .title {
+.bento > li:nth-child(7) .title,
+.bento > li:nth-child(8) .title {
   font-size: 30px;
   letter-spacing: 0.05em;
 }

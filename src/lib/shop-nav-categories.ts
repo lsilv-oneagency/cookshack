@@ -73,6 +73,13 @@ export const SHOP_NAV_CATEGORIES: ShopNavCategory[] = [
     categoryCode: "ctgy_wood_and_pellets",
     stripImage: "/images/category-wood-pellets.png",
   },
+  {
+    label: "Pizza Ovens",
+    kicker: "Wood-Fired",
+    href: "/category/sub_ctgy_pizza_oven",
+    categoryCode: "sub_ctgy_pizza_oven",
+    stripImage: "/images/pizza-ovens-bento.png",
+  },
 ];
 
 const EXCLUDED_MEGA_MENU_CODES = new Set<string>(["ctgy_sauces_and_spices", "ctgy_cookbooks"]);

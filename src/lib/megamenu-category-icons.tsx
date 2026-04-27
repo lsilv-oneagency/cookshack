@@ -6,6 +6,7 @@ import {
   IconFlame,
   IconHome,
   IconBuildingStorefront,
+  IconPizza,
   IconSquares2x2,
   IconWrenchScrewdriver,
 } from "@/components/icons";
@@ -19,6 +20,7 @@ export const MEGAMENU_ICONS: Partial<Record<string, ComponentType<IconProps>>> =
   ctgy_cookbooks: IconBookOpen,
   ctgy_replacement_parts: IconWrenchScrewdriver,
   ctgy_wood_and_pellets: IconFlame,
+  sub_ctgy_pizza_oven: IconPizza,
 };
 
 export function megamenuIconForCategory(categoryCode: string | null | undefined) {

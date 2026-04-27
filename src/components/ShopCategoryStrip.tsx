@@ -1,17 +1,6 @@
 import Link from "next/link";
-import { SHOP_NAV_CATEGORIES, type ShopNavCategory } from "@/lib/shop-nav-categories";
+import { SHOP_NAV_CATEGORIES } from "@/lib/shop-nav-categories";
 import styles from "./shop-category-bento.module.css";
-
-/** Eighth bento tile — mobile-only (hidden from grid at 701px+); not in global shop nav. */
-const BENTO_MOBILE_ONLY_PIZZA: ShopNavCategory = {
-  label: "Pizza Ovens",
-  kicker: "Wood-Fired",
-  href: "/category/sub_ctgy_pizza_oven",
-  categoryCode: "sub_ctgy_pizza_oven",
-  stripImage: "/images/catalog-hero-bg.png",
-};
-
-const BENTO_TILES: ShopNavCategory[] = [...SHOP_NAV_CATEGORIES, BENTO_MOBILE_ONLY_PIZZA];
 
 /** Bento tiles that use `stripImage` from `SHOP_NAV_CATEGORIES`; others keep shared art. */
 const BENTO_CUSTOM_BG_CODES = new Set([
@@ -22,6 +11,7 @@ const BENTO_CUSTOM_BG_CODES = new Set([
   "ctgy_cookbooks",
   "ctgy_replacement_parts",
   "ctgy_wood_and_pellets",
+  "sub_ctgy_pizza_oven",
 ]);
 
 const CATEGORY_BENTO_BG_DEFAULT = "/images/category-bento-placeholder.jpg";
@@ -32,6 +22,7 @@ const BENTO_CARD_BG_CENTER_CODES = new Set([
   "ctgy_cookbooks",
   "ctgy_replacement_parts",
   "ctgy_wood_and_pellets",
+  "sub_ctgy_pizza_oven",
 ]);
 
 const ICONS = [
@@ -74,7 +65,7 @@ const ICONS = [
     <path d="M9.5 20h5" />
     <path d="M12 14v-3" />
   </svg>,
-  // Pizza — mobile-only 8th tile (stroke-only; `.icon svg` sets fill: none)
+  // Pizza ovens (stroke-only; `.icon svg` sets fill: none)
   <svg key="i-pizza" viewBox="0 0 24 24" aria-hidden>
     <path d="M12 3c-1.5 3-6 9-6 13a6 6 0 1012 0c0-4-4.5-10-6-13z" />
     <circle cx="12" cy="14" r="1" />
@@ -83,7 +74,7 @@ const ICONS = [
   </svg>,
 ];
 
-/** Desktop: original 7-cell bento. Mobile: +1 Pizza tile (CSS-hidden on wide viewports). */
+/** Desktop: 7-cell bento + full-width Pizza Ovens row. Mobile: 2-column stack of all eight. */
 export default function ShopCategoryStrip() {
   return (
     <section
@@ -105,17 +96,13 @@ export default function ShopCategoryStrip() {
           </p>
         </header>
         <ul className={`${styles.bento} m-0 list-none p-0`}>
-          {BENTO_TILES.map((cat, i) => {
+          {SHOP_NAV_CATEGORIES.map((cat, i) => {
             const mainLine = cat.cardTitle ?? cat.label;
             const bgUrl = BENTO_CUSTOM_BG_CODES.has(cat.categoryCode)
               ? cat.stripImage
               : CATEGORY_BENTO_BG_DEFAULT;
-            const mobileOnly = cat.categoryCode === BENTO_MOBILE_ONLY_PIZZA.categoryCode;
             return (
-              <li
-                key={cat.href}
-                className={`min-w-0 p-0${mobileOnly ? ` ${styles.bentoMobileOnly}` : ""}`}
-              >
+              <li key={cat.href} className="min-w-0 p-0">
                 <Link
                   href={cat.href}
                   className={styles.card}
