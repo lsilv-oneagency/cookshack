@@ -67,19 +67,20 @@ npm install
 
 ```bash
 # .env.local is pre-configured with the Cookshack store URL
-# Fill in your API token and signing key:
+# Fill in your API token (and signing key only if the token requires signed requests):
 ```
 
 ```env
 MIVA_STORE_URL=https://www.cookshack.com
 MIVA_STORE_CODE=your_store_code
 MIVA_API_TOKEN=your_api_token
-MIVA_SIGNING_KEY=your_base64_signing_key
-MIVA_SIGNING_DIGEST=sha256
 NEXT_PUBLIC_STORE_URL=https://www.cookshack.com
+# Optional — only if the token is set to require request signing:
+# MIVA_SIGNING_KEY=your_base64_signing_key
+# MIVA_SIGNING_DIGEST=sha256
 ```
 
-**In Miva Admin:** Users → API Tokens (or Settings → API / JSON API, depending on version) → create a token with the function permissions listed above. Miva usually shows the **signing key** (base64) once at creation; if it was lost, create a new token and update env everywhere.
+**In Miva Admin:** Users → API Tokens (or Settings → API / JSON API, depending on version) → create a token with the function permissions listed above. If the token uses **signed** requests, Miva shows the **signing key** (base64) once at creation; omit `MIVA_SIGNING_KEY` when the token accepts unsigned requests.
 
 ### Where each credential comes from
 
@@ -88,12 +89,12 @@ NEXT_PUBLIC_STORE_URL=https://www.cookshack.com
 | `MIVA_STORE_URL`, `NEXT_PUBLIC_STORE_URL` | Your storefront URL (the same host used for `/mm5/json.mvc`). |
 | `MIVA_STORE_CODE` | Miva Admin → store / site settings (**Store Code**). |
 | `MIVA_API_TOKEN` | Miva Admin → API Tokens → new token → copy token string. |
-| `MIVA_SIGNING_KEY` | Shown when the API token is created (often base64). Must match that token. |
-| `MIVA_SIGNING_DIGEST` | Usually `sha256`; must match the token’s signing algorithm in Admin. |
+| `MIVA_SIGNING_KEY` | Optional. Only when the token requires HMAC signing—same key Miva shows at token creation (often base64). |
+| `MIVA_SIGNING_DIGEST` | Optional with signing key; usually `sha256`; must match the token’s signing algorithm in Admin. |
 | `MIVA_HTTP_USER`, `MIVA_HTTP_PASS` | Only if **HTTP Basic** protects the store URL (hosting/CDN). From whoever configured that layer—not “automatically” from the API token screen. |
 | `MIVA_DIAGNOSTIC_SECRET` | Optional. **You generate** a random string (e.g. `openssl rand -hex 32`) for `GET /api/health/miva`; not from Miva. |
 
-Production **Access denied** from Miva is usually wrong/mismatched token, signing key, or store code; missing **function** permissions on the token; or **IP restrictions** on the token blocking Vercel.
+Production **Access denied** from Miva is usually wrong/mismatched token or store code; if you use signing, a mismatched key or digest; missing **function** permissions on the token; or **IP restrictions** on the token blocking Vercel.
 
 See `.env.example` for optional vars (`MIVA_RECIPES_CATEGORY_CODE`, etc.).
 

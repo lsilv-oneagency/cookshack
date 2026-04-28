@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       {
         error: message,
         hint: notConfigured
-          ? "Set MIVA_STORE_URL, MIVA_STORE_CODE, MIVA_API_TOKEN (and signing/Basic auth if required) on Vercel."
+          ? "Set MIVA_STORE_URL, MIVA_STORE_CODE, MIVA_API_TOKEN (and MIVA_HTTP_* / MIVA_SIGNING_* only if your host or token requires them) on Vercel."
           : undefined,
       },
       { status: notConfigured ? 503 : 500 }

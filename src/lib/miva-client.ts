@@ -1,4 +1,3 @@
-import { createHmac } from "crypto";
 import { unstable_cache } from "next/cache";
 import type {
   MivaListResponse,
@@ -14,6 +13,8 @@ import {
   isNonPurchasableStorefrontProduct,
   isPdpRelatedPair,
 } from "@/lib/miva-storefront-visibility";
+import { mivaBasicAuthHeader, normalizeMivaHttpPassword } from "@/lib/miva-http-credentials";
+import { mivaJsonApiAuthorizationHeader } from "@/lib/miva-json-api-auth";
 
 /**
  * Minimal `ondemandcolumns` for category grids, search, and product list — matches the original
@@ -52,14 +53,32 @@ export const MIVA_PRODUCT_ON_DEMAND_COLUMNS = [
   "product_inventory",
 ] as const;
 
-const STORE_URL = process.env.MIVA_STORE_URL || "";
-const API_TOKEN = process.env.MIVA_API_TOKEN || "";
-const SIGNING_KEY = process.env.MIVA_SIGNING_KEY || "";
-const STORE_CODE = process.env.MIVA_STORE_CODE || "";
-const DIGEST = process.env.MIVA_SIGNING_DIGEST || "sha256";
-const HTTP_USER = process.env.MIVA_HTTP_USER || "";
-/** Set in env (e.g. `.env.local`). Avoid committing secrets; use quotes if the password contains `$`. */
-const HTTP_PASS = process.env.MIVA_HTTP_PASS || "";
+/**
+ * Per-request env read (not module-load snapshot). Needed so `MIVA_HTTP_*` and tokens from
+ * Vercel / `.env.local` are always current — otherwise nginx Basic can be missing on `/api/products`
+ * (e.g. megamenu) while a standalone script that loads dotenv still works.
+ */
+function readMivaConnectionEnv(): {
+  storeUrl: string;
+  apiToken: string;
+  signingKey: string;
+  storeCode: string;
+  digest: string;
+  httpUser: string;
+  httpPassRaw: string;
+  httpPassNorm: string;
+} {
+  return {
+    storeUrl: (process.env.MIVA_STORE_URL || "").trim(),
+    apiToken: (process.env.MIVA_API_TOKEN || "").trim(),
+    signingKey: (process.env.MIVA_SIGNING_KEY || "").trim(),
+    storeCode: (process.env.MIVA_STORE_CODE || "").trim(),
+    digest: (process.env.MIVA_SIGNING_DIGEST || "sha256").trim() || "sha256",
+    httpUser: (process.env.MIVA_HTTP_USER || "").trim(),
+    httpPassRaw: process.env.MIVA_HTTP_PASS || "",
+    httpPassNorm: normalizeMivaHttpPassword(process.env.MIVA_HTTP_PASS || ""),
+  };
+}
 
 /** Cap each Miva round-trip so `next build` / static generation stays under platform limits. */
 const MIVA_FETCH_TIMEOUT_MS = Math.min(
@@ -67,62 +86,76 @@ const MIVA_FETCH_TIMEOUT_MS = Math.min(
   Number(process.env.MIVA_FETCH_TIMEOUT_MS) || 12_000
 );
 
-function generateAuthHeader(body: string): string {
-  if (!SIGNING_KEY) {
-    return `MIVA ${API_TOKEN}`;
-  }
-
-  const keyBuffer = Buffer.from(SIGNING_KEY, "base64");
-  const signature = createHmac(DIGEST, keyBuffer).update(body).digest("base64");
-  const digestLabel = DIGEST === "sha1" ? "SHA1" : "SHA256";
-  return `MIVA-HMAC-${digestLabel} ${API_TOKEN}:${signature}`;
-}
-
 async function mivaRequest<T>(payload: Record<string, unknown>): Promise<T> {
-  if (!STORE_URL || !API_TOKEN || !STORE_CODE) {
+  const { mergeMivaEnvFromRepoOnce } = await import("@/lib/merge-miva-env-from-dotenv");
+  mergeMivaEnvFromRepoOnce();
+  const e = readMivaConnectionEnv();
+  if (!e.storeUrl || !e.apiToken || !e.storeCode) {
     throw new Error("Miva API not configured (MIVA_STORE_URL, MIVA_API_TOKEN, MIVA_STORE_CODE)");
   }
 
   const body = JSON.stringify({
-    Store_Code: STORE_CODE,
+    Store_Code: e.storeCode,
     Miva_Request_Timestamp: Math.floor(Date.now() / 1000),
     ...payload,
   });
 
-  const authHeader = generateAuthHeader(body);
+  const authHeader = mivaJsonApiAuthorizationHeader(body, e.apiToken, e.signingKey, e.digest);
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     "X-Miva-API-Authorization": authHeader,
   };
 
-  if (HTTP_USER && HTTP_PASS) {
-    headers["Authorization"] =
-      "Basic " + Buffer.from(`${HTTP_USER}:${HTTP_PASS}`).toString("base64");
+  if (e.httpUser && e.httpPassNorm) {
+    headers["Authorization"] = mivaBasicAuthHeader(e.httpUser, e.httpPassRaw.trim());
   }
 
-  const baseUrl = STORE_URL.replace(/\/$/, "");
+  const baseUrl = e.storeUrl.replace(/\/$/, "");
   const response = await fetch(`${baseUrl}/mm5/json.mvc`, {
     method: "POST",
     headers,
     body,
+    redirect: "manual",
     next: { revalidate: 60 },
     signal: AbortSignal.timeout(MIVA_FETCH_TIMEOUT_MS),
   });
 
-  if (!response.ok) {
-    throw new Error(`Miva API HTTP error: ${response.status}`);
-  }
-
-  const json = await response.json();
-
-  if (!json.success && json.success !== true && json.success !== 1) {
+  if (response.status >= 300 && response.status < 400) {
+    const loc = response.headers.get("location") || "";
     throw new Error(
-      json.error_message || `Miva API error: ${json.error_code}`
+      `Miva API redirect HTTP ${response.status}${loc ? ` → ${loc.slice(0, 120)}` : ""} (check store URL / Basic auth)`
     );
   }
 
-  return json;
+  if (!response.ok) {
+    const snippet = (await response.text()).slice(0, 200).replace(/\s+/g, " ");
+    let extra = "";
+    if (
+      response.status === 401 &&
+      /nginx|Authorization Required/i.test(snippet) &&
+      (!e.httpUser || !e.httpPassNorm)
+    ) {
+      extra =
+        " Nginx expects HTTP Basic: set MIVA_HTTP_USER and MIVA_HTTP_PASS on this host (e.g. Vercel project env), not only in local .env.local.";
+    }
+    throw new Error(`Miva API HTTP ${response.status}${snippet ? `: ${snippet}` : ""}${extra}`);
+  }
+
+  let json: Record<string, unknown>;
+  try {
+    json = (await response.json()) as Record<string, unknown>;
+  } catch {
+    throw new Error(`Miva API: response was not JSON (HTTP ${response.status})`);
+  }
+
+  if (!json.success && json.success !== true && json.success !== 1) {
+    throw new Error(
+      (json.error_message as string) || `Miva API error: ${String(json.error_code ?? "")}`
+    );
+  }
+
+  return json as T;
 }
 
 // Miva list responses nest the array: { success, data: { total_count, start_offset, data: [] } }
@@ -169,13 +202,18 @@ export async function getProducts(
 // look up by code in memory — 600 products is ~246KB and takes ~500ms.
 const getProductCatalog = unstable_cache(
   async (): Promise<MivaProduct[]> => {
-    const res = await mivaListRequest<MivaProduct>({
-      Function: "ProductList_Load_Query",
-      Count: 999,
-      Filter: [{ name: "active", operator: "EQ", value: true }],
-      ondemandcolumns: [...MIVA_PRODUCT_ON_DEMAND_COLUMNS],
-    });
-    return res.data || [];
+    try {
+      const res = await mivaListRequest<MivaProduct>({
+        Function: "ProductList_Load_Query",
+        Count: 999,
+        Filter: [{ name: "active", operator: "EQ", value: true }],
+        ondemandcolumns: [...MIVA_PRODUCT_ON_DEMAND_COLUMNS],
+      });
+      return res.data || [];
+    } catch (e) {
+      console.warn("[miva-client] product catalog unavailable", e);
+      return [];
+    }
   },
   ["miva-product-catalog", "v5-cfval"],
   { revalidate: 300 } // 5-minute cache

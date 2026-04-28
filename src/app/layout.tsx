@@ -18,12 +18,19 @@ const outfit = Outfit({
 /** Avoid Vercel static prerender >60s when Miva is slow — render on demand instead. */
 export const dynamic = "force-dynamic";
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+function metadataBaseUrl(): URL {
+  const raw =
+    (process.env.NEXT_PUBLIC_SITE_URL || "").trim() ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL.trim()}` : "http://localhost:3000");
+  try {
+    return new URL(raw);
+  } catch {
+    return new URL("http://localhost:3000");
+  }
+}
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: metadataBaseUrl(),
   title: {
     default: "Cookshack — Smokers, Grills & Pizza Ovens",
     template: "%s | Cookshack",
@@ -37,7 +44,7 @@ export const metadata: Metadata = {
   },
 };
 
-async function RootLayoutInner({ children }: { children: React.ReactNode }) {
+function RootLayoutInner({ children }: { children: React.ReactNode }) {
   return (
     <CartProvider>
       <Header />

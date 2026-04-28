@@ -540,10 +540,26 @@ export default function Header() {
                   <div className="rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-4 text-center">
                     <p className="text-xs text-neutral-800 sm:text-sm">{megaError}</p>
                     <p className="mt-2 text-[10px] text-neutral-600 sm:text-xs">
-                      On the live site this is usually a Vercel env issue — copy every{" "}
-                      <code className="rounded bg-neutral-200 px-1 text-neutral-900">MIVA_*</code> value from{" "}
-                      <code className="rounded bg-neutral-200 px-1 text-neutral-900">.env.local</code> into Vercel (Production
-                      and Preview).
+                      {typeof window !== "undefined" &&
+                      (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? (
+                        <>
+                          If you see nginx <code className="rounded bg-neutral-200 px-1">401</code>, restart{" "}
+                          <code className="rounded bg-neutral-200 px-1">npm run dev</code> and confirm{" "}
+                          <code className="rounded bg-neutral-200 px-1">MIVA_HTTP_USER</code> /{" "}
+                          <code className="rounded bg-neutral-200 px-1">MIVA_HTTP_PASS</code> in this project&apos;s{" "}
+                          <code className="rounded bg-neutral-200 px-1">.env.local</code> (use single quotes if the
+                          password contains <code className="rounded bg-neutral-200 px-1">$</code>). If it still fails, a{" "}
+                          <code className="rounded bg-neutral-200 px-1">package-lock.json</code> in your home folder can
+                          confuse Next — remove or rename it so this repo is the only lockfile parent.
+                        </>
+                      ) : (
+                        <>
+                          On production this is usually missing{" "}
+                          <code className="rounded bg-neutral-200 px-1 text-neutral-900">MIVA_*</code> in the host env —
+                          copy values from <code className="rounded bg-neutral-200 px-1 text-neutral-900">.env.local</code>{" "}
+                          into your deploy settings (e.g. Vercel).
+                        </>
+                      )}
                     </p>
                     <Link
                       href={activeMegaItem.href}
