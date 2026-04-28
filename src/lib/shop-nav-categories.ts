@@ -78,7 +78,7 @@ export const SHOP_NAV_CATEGORIES: ShopNavCategory[] = [
     kicker: "Wood-Fired",
     href: "/category/sub_ctgy_pizza_oven",
     categoryCode: "sub_ctgy_pizza_oven",
-    stripImage: "/images/pizza-ovens-bento.png",
+    stripImage: "/images/category-bento-placeholder.jpg",
   },
 ];
 

@@ -29,9 +29,17 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(result);
   } catch (error) {
     console.error("[API] products error:", error);
+    const message = error instanceof Error ? error.message : "Failed to fetch products";
+    const notConfigured =
+      message.includes("Miva API not configured") || message.includes("MIVA_");
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to fetch products" },
-      { status: 500 }
+      {
+        error: message,
+        hint: notConfigured
+          ? "Set MIVA_STORE_URL, MIVA_STORE_CODE, MIVA_API_TOKEN (and signing/Basic auth if required) on Vercel."
+          : undefined,
+      },
+      { status: notConfigured ? 503 : 500 }
     );
   }
 }

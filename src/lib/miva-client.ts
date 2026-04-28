@@ -16,9 +16,23 @@ import {
 } from "@/lib/miva-storefront-visibility";
 
 /**
- * Ondemand columns for product list — description, all custom fields, images, options,
- * categories, true related products, and shipping box dimensions. See Miva
- * `ProductList_Load_Query` ondemand column docs.
+ * Minimal `ondemandcolumns` for category grids, search, and product list — matches the original
+ * starter app (`~/Downloads/miva`). Heavy columns here can cause Miva to error or slow down
+ * `CategoryProductList_Load_Query` / megamenu `/api/products` on some stores/tokens.
+ */
+const MIVA_CATEGORY_AND_SEARCH_ON_DEMAND: readonly string[] = ["uris", "productimagedata"];
+
+/** Original starter `ProductList_Load_Query` columns (global product grid). */
+const MIVA_PRODUCT_GRID_ON_DEMAND: readonly string[] = [
+  "catcount",
+  "uris",
+  "CustomField_Values",
+  "productimagedata",
+];
+
+/**
+ * Ondemand columns for cached catalog + PDP — description, custom fields, categories, related, etc.
+ * See Miva `ProductList_Load_Query` ondemand column docs.
  */
 export const MIVA_PRODUCT_ON_DEMAND_COLUMNS = [
   "descrip",
@@ -44,8 +58,8 @@ const SIGNING_KEY = process.env.MIVA_SIGNING_KEY || "";
 const STORE_CODE = process.env.MIVA_STORE_CODE || "";
 const DIGEST = process.env.MIVA_SIGNING_DIGEST || "sha256";
 const HTTP_USER = process.env.MIVA_HTTP_USER || "";
-// Password stored directly to avoid dotenv $ interpolation issues
-const HTTP_PASS = process.env.MIVA_HTTP_PASS || "NQbHbylsp1?1k$r0";
+/** Set in env (e.g. `.env.local`). Avoid committing secrets; use quotes if the password contains `$`. */
+const HTTP_PASS = process.env.MIVA_HTTP_PASS || "";
 
 /** Cap each Miva round-trip so `next build` / static generation stays under platform limits. */
 const MIVA_FETCH_TIMEOUT_MS = Math.min(
@@ -145,7 +159,7 @@ export async function getProducts(
       { name: "active", operator: "EQ", value: true },
       ...filter,
     ],
-    ondemandcolumns: [...MIVA_PRODUCT_ON_DEMAND_COLUMNS],
+    ondemandcolumns: [...MIVA_PRODUCT_GRID_ON_DEMAND],
   });
 }
 
@@ -205,7 +219,7 @@ export async function searchProducts(
     Count: count,
     Offset: offset,
     Filter: filter,
-    ondemandcolumns: [...MIVA_PRODUCT_ON_DEMAND_COLUMNS],
+    ondemandcolumns: [...MIVA_CATEGORY_AND_SEARCH_ON_DEMAND],
   });
 }
 
@@ -222,7 +236,7 @@ export async function getCategoryProducts(
     Offset: offset,
     Sort: sort,
     Filter: [{ name: "active", operator: "EQ", value: true }],
-    ondemandcolumns: [...MIVA_PRODUCT_ON_DEMAND_COLUMNS],
+    ondemandcolumns: [...MIVA_CATEGORY_AND_SEARCH_ON_DEMAND],
   });
 }
 

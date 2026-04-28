@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 const STORE_URL = process.env.MIVA_STORE_URL || "";
 const HTTP_USER = process.env.MIVA_HTTP_USER || "";
-const HTTP_PASS = process.env.MIVA_HTTP_PASS || "NQbHbylsp1?1k$r0";
+/** Required when `MIVA_HTTP_USER` is set; same as JSON client — use `.env.local`, never commit. */
+const HTTP_PASS = process.env.MIVA_HTTP_PASS || "";
 
 // Image proxy — fetches Miva-hosted images server-side (adding Basic Auth if needed)
 // Usage: /api/img?p=mm5/graphics/00000001/1/SM025.png

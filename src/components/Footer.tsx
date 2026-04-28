@@ -116,7 +116,7 @@ export default function Footer() {
                   {[
                     ["Help Center", "/support"],
                     ["Video Support", "/video-support"],
-                    ["Track Your Order", "/order-history"],
+                    ["Track Your Order", "/order-status"],
                     ["Returns & Exchanges", "/returns"],
                     ["Warranty", "/warranty"],
                     ["Contact Us", "/contact"],
